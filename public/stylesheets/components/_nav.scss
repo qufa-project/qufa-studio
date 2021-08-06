@@ -1,0 +1,40 @@
+nav {
+  &.top-nav {
+    background-color: #000;
+    padding: 0.5rem;
+  }
+}
+
+.sidenav {
+  padding-top: 4px;
+
+  &.sidenav-fixed {
+    top: 64px;
+    background: #000;
+  }
+
+  li {
+    padding: 0 12px;
+
+    > a {
+      font-size: 16px;
+      color: #8494ae;
+      padding: 0 12px;
+
+      > i {
+        margin: 0 16px 0 0 !important;
+        color: #8494ae !important;
+      }
+
+      &.active {
+        color: #fff;
+        background-color: #33a299;
+        border-radius: 2px;
+
+        > i {
+          color: #fff !important;
+        }
+      }
+    }
+  }
+}

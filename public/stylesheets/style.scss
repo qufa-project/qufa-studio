@@ -1,8 +1,24 @@
+@import "components/nav";
+
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #373740;
 }
 
-a {
-  color: #00B7FF;
+main {
+  padding: 24px;
+}
+
+// Side-Nav에 따른 좌측 여백 설정
+header,
+main,
+footer {
+  padding-left: 300px;
+}
+
+@media only screen and (max-width: 992px) {
+  header,
+  main,
+  footer {
+    padding-left: 0;
+  }
 }

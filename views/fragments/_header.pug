@@ -1,6 +1,9 @@
-nav
+nav.top-nav
   .nav-wrapper
-    a.brand-logo(href='#') Logo
+    a.sidenav-trigger(href='#' data-target='slide-out')
+      i.material-icons menu
+    a.brand-logo(href='/')
+      img(src='/images/logo.png')
     ul#nav-mobile.right.hide-on-med-and-down
       li
         a(href='sass.html') Sass
@@ -8,3 +11,27 @@ nav
         a(href='badges.html') Components
       li
         a(href='collapsible.html') JavaScript
+
+ul#slide-out.sidenav.sidenav-fixed
+  li
+    a.active(href='#!')
+      i.material-icons cloud
+      | 데이터셋 목록
+  li
+    a(href='#!') 
+      i.material-icons cloud
+      | 데이터 정제
+  li
+    a(href='#!') 
+      i.material-icons cloud
+      | 데이터 융합
+  li
+    a(href='#!') 
+      i.material-icons cloud
+      | 데이터 저장소
+  li
+    .divider
+  li
+    a.subheader Subheader
+  li
+    a.waves-effect(href='#!') Third Link With Waves
