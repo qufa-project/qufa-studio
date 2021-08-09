@@ -1,11 +1,14 @@
 @import "components/nav";
 
+@import "app/data";
+
 body {
   background-color: #373740;
+  color: #fff;
 }
 
 main {
-  padding: 24px;
+  padding: 12px;
 }
 
 // Side-Nav에 따른 좌측 여백 설정

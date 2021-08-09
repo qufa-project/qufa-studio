@@ -1,0 +1,44 @@
+.data-table {
+  background-color: #25262c;
+
+  thead {
+    > tr {
+      > th {
+        color: #8494ae;
+        text-align: center;
+
+        &.w60 {
+          width: 60px;
+        }
+      }
+    }
+  }
+
+  thead,
+  tbody {
+    > tr {
+      border-bottom: 1px solid #34353a;
+
+      > th,
+      > td {
+        .check-option {
+          color: #4e586b;
+        }
+
+        .star {
+          font-size: 20px;
+          color: #c0a32a;
+        }
+
+        .star-border {
+          font-size: 20px;
+          color: #4e586b;
+        }
+      }
+    }
+  }
+
+  .text-center {
+    text-align: center;
+  }
+}

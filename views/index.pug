@@ -1,5 +1,54 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .row
+    .col.s12
+      a.waves-effect.waves-light.btn
+        i.material-icons.left add
+        | 신규데이터 추가
+
+  .row
+    .col.m8.input-field
+      h6
+        | 총 512건
+    .col.m4.input-field
+      i.material-icons.prefix search
+      input#icon_prefix.validate(type='text')
+      label(for='icon_prefix') 데이터 검색
+
+  .row
+    .col.s12
+      table.data-table
+        thead
+          tr
+            th.text-center.w60 
+              i.check-option.material-icons.prefix check_box_outline_blank
+            th 데이터셋명
+            th 데이터품질
+            th 오류 지수
+            th 데이터 유형
+            th 데이터 등록일
+            th
+            th
+        tbody
+          tr
+            td.text-center
+              i.check-option.material-icons.prefix check_box_outline_blank
+            td
+              | 테스트 데이터 111
+            td.text-center
+              each val in [1, 2, 3, 4, 5]
+                if (val <= 3)
+                  i.star.material-icons.prefix star
+                else
+                  i.star-border.material-icons.prefix star_border
+          tr
+            td.text-center
+              i.check-option.material-icons.prefix check_box_outline_blank
+            td.text-center Jellybean
+            td $3.76
+          tr
+            td.text-center
+              i.check-option.material-icons.prefix check_box_outline_blank
+            td.text-center Lollipop
+            td $7.00
