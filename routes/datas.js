@@ -6,6 +6,7 @@ var storage = multer.memoryStorage()
 var upload = multer({ storage: storage })
 
 var FileManager = require("../lib/FileManager")
+var MetaManager = require("../lib/MetaManager")
 
 /**
  * @openapi
@@ -17,7 +18,6 @@ var FileManager = require("../lib/FileManager")
  *         description: Returns a mysterious string.
  */
 router.get("/", function (req, res, next) {
-  
   res.json("data");
 });
 
@@ -48,4 +48,24 @@ router.post("/", upload.single('file'), async function (req, res, next) {
   }
   res.json("upload success");
 });
+
+/**
+ * @openapi
+ * /datas/meta:
+ *   get:
+ *     description: Welcome to swagger-jsdoc!
+ *     responses:
+ *       200:
+ *         description: Returns a mysterious string.
+ */
+router.get("/meta", async function (req, res, next) {
+  const key = '1628471368985_stat_new_0526.csv'
+  //const readStream = await FileManager.createReadStream(key);
+  //detect file encoing using stream
+  const encoding = await MetaManager.detectEncoding(key);
+  const datas = await MetaManager.parseRecord(key, encoding);
+  console.log(datas)
+  res.json("success")
+})
+
 module.exports = router;
