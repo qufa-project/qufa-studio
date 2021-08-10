@@ -25,7 +25,7 @@
   font-size: 1.25rem;
   background-color: #c8dadf;
   position: relative;
-  padding: 100px 20px;
+  padding: 40px 20px;
 }
 .box.has-advanced-upload {
   outline: 2px dashed #92b0b3;
@@ -203,6 +203,7 @@
 }
 
 .box__button {
+  border: none;
   font-weight: 700;
   color: #e5edf1;
   background-color: #39bfd3;
@@ -213,4 +214,8 @@
 .box__button:hover,
 .box__button:focus {
   background-color: #0f3c4b;
+}
+
+.csv-cols-wrap {
+  text-align: left;
 }

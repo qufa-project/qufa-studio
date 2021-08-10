@@ -7,11 +7,16 @@ block content
         .box__input
           svg.box__icon(xmlns='http://www.w3.org/2000/svg' width='50' height='43' viewBox='0 0 50 43')
             path(d='M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z')
-          input.box__file#file(type='file' name='files[]' data-multiple-caption='{count} files selected' multiple)
+          input.box__file#file(type='file' name='file' accept='.csv')
           label.box__file__label(for='file')
-            strong File을 선택하세요
-            span.box__dragndrop 또는 File을 Drag 하세요.
+            strong CSV File을 선택하세요. 
+            span.box__dragndrop 또는 여기로 Drag 하세요
             | .
+
+          .row.mt-2
+            .col.s12
+              .csv-cols-wrap
+
           button.box__button(type='submit') Upload
         .box__uploading Uploading…
         .box__success Done!
@@ -21,6 +26,7 @@ block content
           | .
 
 block scripts
+  script(src='/javascripts/ext/sheetjs/xlsx.full.min.js')
   script.
     $(function() {
       var isAdvancedUpload = function() {
@@ -40,6 +46,27 @@ block scripts
           showFiles	 = function( files )
           {
             label.textContent = files.length > 1 ? ( input.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', files.length ) : files[ 0 ].name;
+            renderCols(files);
+          },
+          renderCols = function ( files ) { // CSV 컬럼 처리를 위한 추가 로직 등록
+            var f = files[0];
+            if (f) {
+              var r = new FileReader();
+              r.onload = e => {
+                var data = e.target.result;
+                var wb = XLSX.read(data, {
+                  type: 'binary',
+                  sheetRows: 10
+                });
+                
+                console.log(wb.Sheets.Sheet1);
+                var js = XLSX.utils.sheet_to_json(wb.Sheets.Sheet1, {header:1, raw:true});
+                console.log(js);
+              }
+              r.readAsBinaryString(f);
+            } else {
+              console.log("Failed to load file");
+            }
           },
           triggerFormSubmit = function()
           {
@@ -59,8 +86,6 @@ block scripts
         input.addEventListener( 'change', function( e )
         {
           showFiles( e.target.files );
-
-          
         });
 
         // drag&drop files if the feature is available
@@ -94,9 +119,14 @@ block scripts
           form.addEventListener( 'drop', function( e )
           {
             droppedFiles = e.dataTransfer.files; // the files that were dropped
-            showFiles( droppedFiles );
+            console.log("change");
+            var re = /(\.csv)$/i;
+            if (!re.exec(droppedFiles[0].name)) {
+              alert("CSV 파일만 등록 가능합니다.");
+            }
 
-                    });
+            showFiles( droppedFiles );
+          });
         }
 
 
