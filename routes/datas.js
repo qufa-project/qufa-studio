@@ -8,6 +8,8 @@ var upload = multer({ storage: storage })
 var FileManager = require("../lib/FileManager")
 var MetaManager = require("../lib/MetaManager")
 
+const child_process = require("child_process");
+
 /**
  * @openapi
  * /datas:
@@ -43,7 +45,7 @@ router.post("/", upload.single('file'), async function (req, res, next) {
   try {
     const response = await FileManager.uploadFile(req.file);
     console.log(response);
-  } catch(err) {
+  } catch (err) {
     console.log(err)
   }
   res.json("upload success");
@@ -59,13 +61,23 @@ router.post("/", upload.single('file'), async function (req, res, next) {
  *         description: Returns a mysterious string.
  */
 router.get("/meta", async function (req, res, next) {
+
+  res.json("success")
   const key = '1628471368985_stat_new_0526.csv'
   //const readStream = await FileManager.createReadStream(key);
   //detect file encoing using stream
-  const encoding = await MetaManager.detectEncoding(key);
-  const datas = await MetaManager.parseRecord(key, encoding);
-  console.log(datas)
-  res.json("success")
+  ls = child_process.spawn('node',['./scripts/parseCsv.js', key])
+  ls.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
+  });
+
+  ls.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+  });
+
+  ls.on('exit', function (code) {
+    console.log('exit: ' + code);
+  });
 })
 
 module.exports = router;
