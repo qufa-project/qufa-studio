@@ -4,23 +4,24 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
-const swaggerUi = require('swagger-ui-express');
+const swaggerUi = require("swagger-ui-express");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var datasRouter = require("./routes/datas");
+var projectsRouter = require("./routes/projects");
 
 // swagger initialize
 const options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'Qufa API',
-      version: '0.0.1'
+      title: "Qufa API",
+      version: "0.0.1",
     },
   },
-  apis: ['./routes/datas.js']
-}
+  apis: ["./routes/datas.js"],
+};
 
 const openapiSpecification = swaggerJsdoc(options);
 
@@ -43,9 +44,11 @@ app.use("/users", usersRouter);
 //api
 app.use("/datas", datasRouter);
 
-//docs
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification))
+//projects
+app.use("/projects", projectsRouter);
 
+//docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
