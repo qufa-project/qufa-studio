@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www & npm run scss",
+    "scss": "sass --watch ./public/stylesheets/style.scss ./public/stylesheets/style.css"
   },
   "dependencies": {
     "aws-sdk": "^2.962.0",
@@ -18,12 +19,12 @@
     "morgan": "~1.9.1",
     "multer": "^1.4.2",
     "mysql2": "^2.3.0",
-    "node-sass-middleware": "0.11.0",
     "pug": "^3.0.2",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "sass": "^1.38.0"
   }
 }
