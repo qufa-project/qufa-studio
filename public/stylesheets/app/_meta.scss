@@ -1,0 +1,33 @@
+table.meta-form-table {
+  background-color: #373740;
+
+  thead,
+  tbody {
+    > tr {
+      > th,
+      > td {
+        padding: 4px 8px;
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+
+        svg.caret {
+          fill: #fff;
+        }
+        input {
+          color: #fff;
+        }
+
+        .input-field {
+          position: relative;
+          display: inline-block !important;
+          margin-top: 0;
+          margin-bottom: 0;
+
+          > input {
+            display: inline-block !important;
+          }
+        }
+      }
+    }
+  }
+}

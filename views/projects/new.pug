@@ -26,9 +26,66 @@ block content
           | .
 
 block scripts
+  script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+  script(src='/javascripts/app/handlebars-helper.js')
   script(src='/javascripts/ext/sheetjs/xlsx.full.min.js')
   script.
     $(function() {
+      var metaFormTemplate;
+      var colTypeOrders = ["string", "number", "date", "boolean"];
+
+      $.get("/javascripts/templates/data/metaForm.hbs", function(t) {
+        metaFormTemplate = Handlebars.compile(t);
+      });
+
+      function renderMetaForm(csvRows) {
+        console.log(csvRows);
+        var cols = [];
+        var headers = csvRows[0];
+        for (var header of headers) {
+          cols.push({
+            name: header,
+            maxLen: 0
+          })
+        }
+
+        for (var i = 1; i < csvRows.length; i++) {
+          var row = csvRows[i];
+
+          for (var j = 0; j < row.length; j++) {
+            value = row[j];
+
+            col = cols[j];
+            col.type = findColType(col.type, typeof value);
+            col.maxLen = Math.max(col.maxLen, ("" + value).length);
+          }
+        }
+
+        var metaFormHtml = metaFormTemplate(cols);
+        console.log(cols);
+        console.log(metaFormHtml);
+        $(".csv-cols-wrap").html(metaFormHtml);
+        $(".meta-form-select").formSelect({
+          classes: "meta-form-select"
+        });
+      }
+
+      function findColType(before, after) {
+        if (!before) {
+          return after;
+        }
+        
+        if (!after) {
+          return before;
+        }
+
+        if (colTypeOrders.indexOf(before) < colTypeOrders.indexOf(after)) {
+          return before;
+        }
+
+        return after
+      }
+
       var isAdvancedUpload = function() {
         var div = document.createElement( 'div' );
         return ( ( 'draggable' in div ) || ( 'ondragstart' in div && 'ondrop' in div ) ) && 'FormData' in window && 'FileReader' in window;
@@ -59,11 +116,12 @@ block scripts
                   sheetRows: 10
                 });
                 
-                console.log(wb.Sheets.Sheet1);
                 var js = XLSX.utils.sheet_to_json(wb.Sheets.Sheet1, {header:1, raw:true});
-                console.log(js);
+                
+                renderMetaForm(js);
               }
-              r.readAsBinaryString(f);
+
+              r.readAsText(f, 'CP949'); // encoding에 따른 처리 추가
             } else {
               console.log("Failed to load file");
             }
@@ -119,7 +177,6 @@ block scripts
           form.addEventListener( 'drop', function( e )
           {
             droppedFiles = e.dataTransfer.files; // the files that were dropped
-            console.log("change");
             var re = /(\.csv)$/i;
             if (!re.exec(droppedFiles[0].name)) {
               alert("CSV 파일만 등록 가능합니다.");
