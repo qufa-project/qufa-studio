@@ -3,7 +3,19 @@ table.meta-form-table {
 
   thead,
   tbody {
+    > tr:first-child {
+      th,
+      td {
+        border-top: 1px solid #ddd;
+      }
+    }
+
     > tr {
+      > th:first-child,
+      > td:first-child {
+        border-left: 1px solid #ddd;
+      }
+
       > th,
       > td {
         padding: 4px 8px;
