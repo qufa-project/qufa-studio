@@ -9,7 +9,10 @@
         <th class="center-align">최대길이</th>
         <th class="center-align">소수점 자리수</th>
         <th class="center-align">날짜양식</th>
-        <th class="center-align">True</th>
+        <th class="center-align">True 값</th>
+        <th class="center-align">NOT NULL</th>
+        <th class="center-align">UNIQUE</th>
+        <th class="center-align">INDEX</th>
       </tr>
     </thead>
 
@@ -58,6 +61,30 @@
             <div class="input-field">
               <input class="true-value" type="text" value="">
             </div>
+          </td>
+          <td class="center-align">
+            <p>
+              <label>
+                <input class="is-not-null filled-in" type="checkbox" />
+                <span></span>
+              </label>
+            </p>
+          </td>
+          <td class="center-align">
+            <p>
+              <label>
+                <input class="is-unique filled-in" type="checkbox" />
+                <span></span>
+              </label>
+            </p>
+          </td>
+          <td class="center-align">
+            <p>
+              <label>
+                <input class="is-index filled-in" type="checkbox" />
+                <span></span>
+              </label>
+            </p>
           </td>
         </tr>
       {{/each}}

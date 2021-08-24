@@ -162,10 +162,14 @@ block scripts
             maxLength: $(row).find(".max-length").val(),
             floatLength: $(row).find(".float-length").val(),
             dateFormat: $(row).find(".date-format").val(),
-            trueValue: $(row).find(".true-value").val()
-          })
+            trueValue: $(row).find(".true-value").val(),
+            isNotNull: $(row).find(".is-not-null").is(":checked"),
+            isUnique: $(row).find(".is-unique").is(":checked"),
+            isIndex: $(row).find(".is-index").is(":checked")
+          });
         });
-        formData.append('meta', meta);
+        console.log(meta);
+        formData.append('meta', meta);        
         
         for (var pair of formData.entries()) {
           console.log(pair[0]+ ', ' + pair[1]); 
