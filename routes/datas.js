@@ -51,6 +51,13 @@ router.post("/", upload.single("file"), async function (req, res, next) {
   res.json("upload success");
 });
 
+router.post("/test", upload.single("file"), async function (req, res, next) {
+  console.log(req.file);
+  console.log(req.body.meta);
+  const formData = req.body;
+  res.json("upload success");
+});
+
 /**
  * @openapi
  * /datas/meta:

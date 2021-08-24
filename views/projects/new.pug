@@ -151,7 +151,6 @@ block scripts
       }
 
       $(document).on("click", "#save-meta-btn", function() {
-        console.log("click");
         var formData = new FormData();
         formData.append('file', targetFiels[0]);
         var meta = [];
@@ -166,11 +165,14 @@ block scripts
             trueValue: $(row).find(".true-value").val()
           })
         });
-
-        formData.append(JSON.stringify(meta));
+        formData.append('meta', meta);
+        
+        for (var pair of formData.entries()) {
+          console.log(pair[0]+ ', ' + pair[1]); 
+        }
 
         $.ajax({
-          url: '',
+          url: '/datas/test',
           data: formData,
           type: 'POST',
           contentType: false,

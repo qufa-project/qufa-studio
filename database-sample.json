@@ -1,0 +1,29 @@
+{
+  "dev": {
+    "host": "localhost",
+    "user": "root",
+    "password" : "",
+    "database": "qufa",
+    "port": 3306,
+    "driver": "mysql",
+    "multipleStatements": true
+  },
+
+  "test": {
+    "host": "localhost",
+    "user": { "ENV" : "DB_USER" },
+    "password" : { "ENV" : "DB_PASS" },
+    "database": "database-name",
+    "driver": "mysql",
+    "multipleStatements": true
+  },
+
+  "prod": {
+    "host": "localhost",
+    "user": { "ENV" : "DB_USER" },
+    "password" : { "ENV" : "DB_PASS" },
+    "database": "database-name",
+    "driver": "mysql",
+    "multipleStatements": true
+  }
+}
