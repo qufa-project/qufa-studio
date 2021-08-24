@@ -1,64 +1,72 @@
-<table class="meta-form-table">
-  <thead>
-    <tr>
-      <th></th>
-      <th class="center-align">컬럼명(영문)</th>
-      <th class="center-align">컬럼명(국문)</th>
-      <th class="center-align">데이터타입</th>
-      <th class="center-align">최대길이</th>
-      <th class="center-align">소수점 자리수</th>
-      <th class="center-align">날짜양식</th>
-      <th class="center-align">True</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {{#each this}}
+<div>
+  <table class="meta-form-table">
+    <thead>
       <tr>
-        <td>{{math @index "+" 1}}</td>
-        <td>
-          <div class="input-field">
-            <input type="text" value="{{enName}}">
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <input type="text" value="{{koName}}">
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <select class="meta-type-select meta-form-select">
-              {{#select type}}
-                <option value="string">문자</option>
-                <option value="number">숫자</option>
-                <option value="date">날짜</option>
-                <option value="boolean">불리안</option>
-              {{/select}}
-            </select>
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <input class="right-align" type="number" value="{{maxLen}}">
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <input class="right-align" type="number" value="">
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <input class="right-align" type="number" value="">
-          </div>
-        </td>
-        <td>
-          <div class="input-field">
-            <input type="text" value="">
-          </div>
-        </td>
+        <th></th>
+        <th class="center-align">컬럼명(영문)</th>
+        <th class="center-align">컬럼명(국문)</th>
+        <th class="center-align">데이터타입</th>
+        <th class="center-align">최대길이</th>
+        <th class="center-align">소수점 자리수</th>
+        <th class="center-align">날짜양식</th>
+        <th class="center-align">True</th>
       </tr>
-    {{/each}}
-  </tbody>
-</table>
+    </thead>
+
+    <tbody>
+      {{#each this}}
+        <tr class="meta-form-row" data-idx="{{@index}}">
+          <td>{{math @index "+" 1}}</td>
+          <td>
+            <div class="input-field">
+              <input class="meta-form name" type="text" value="{{enName}}">
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <input class="meta-form ko-name" type="text" value="{{koName}}">
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <select class="meta-type-select meta-form-select data-type">
+                {{#select type}}
+                  <option value="string">문자</option>
+                  <option value="number">숫자</option>
+                  <option value="date">날짜</option>
+                  <option value="boolean">불리안</option>
+                {{/select}}
+              </select>
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <input class="right-align max-length" type="number" value="{{maxLen}}">
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <input class="right-align float-length" type="number" value="">
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <input class="right-align date-format" type="text" value="">
+            </div>
+          </td>
+          <td>
+            <div class="input-field">
+              <input class="true-value" type="text" value="">
+            </div>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="mt-2 right-align">
+    <button id="save-meta-btn" class="btn waves-effect waves-light" type="button">데이터 등록하기
+      <i class="material-icons right">send</i>
+    </button>
+  </div>
+</div>

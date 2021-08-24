@@ -55,6 +55,7 @@ block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
   script(src='/javascripts/app/handlebars-helper.js')
   script(src='/javascripts/ext/papa-parser/papaparse.min.js')
+  script(src='/javascripts/ext/momentjs/moment-with-locales.min.js')
   script.
     $(function() {
       var metaFormTemplate;
@@ -122,8 +123,12 @@ block scripts
       });
 
       function findType(value) {
-        if (!Number.isNaN(value) && !Number.isNaN(parseFloat(value))) {
+        if (!Number.isNaN(value) && !Number.isNaN(Number(value))) {
           return "number";
+        }
+
+        if (moment(value).isValid()) {
+          return "date";
         }
 
         return "string";
@@ -144,6 +149,39 @@ block scripts
 
         return after
       }
+
+      $(document).on("click", "#save-meta-btn", function() {
+        console.log("click");
+        var formData = new FormData();
+        formData.append('file', targetFiels[0]);
+        var meta = [];
+        $(".meta-form-row").each(function(idx, row) {
+          meta.push({
+            name: $(row).find(".name").val(),
+            koName: $(row).find(".ko-name").val(),
+            dataType: $(row).find(".data-type").val(),
+            maxLength: $(row).find(".max-length").val(),
+            floatLength: $(row).find(".float-length").val(),
+            dateFormat: $(row).find(".date-format").val(),
+            trueValue: $(row).find(".true-value").val()
+          })
+        });
+
+        formData.append(JSON.stringify(meta));
+
+        $.ajax({
+          url: '',
+          data: formData,
+          type: 'POST',
+          contentType: false,
+          processData: false,
+          success: function(d) {
+            console.log(d);
+          }, error: function(err) {
+            console.error(err);
+          }
+        })
+      });
 
       var isAdvancedUpload = function() {
         var div = document.createElement( 'div' );
