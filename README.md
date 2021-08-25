@@ -9,14 +9,17 @@
 
 ## 2. Installation
 
-### [db-migrate](https://github.com/db-migrate/node-db-migrate#readme)
+### [Sequelize ORM](https://sequelize.org/)
 
-- database-sample.json 참고하여 database.json 생성
+- config/config-sample.json 참고하여 config.json 생성
 
 ```sh
-# migration 생성 (별도의 sql 파일 생성하여 migration 정보 관리)
-> db-migrate create MIGRATION_NAME --sql-file
+# model 및 migration 생성
+# model 생성 후 tableName 설정 추가 필요(Case 문제)
+> npx sequelize-cli model:generate --name Data --attributes name:string,contentType:string,fileSize:bigint,remotePath:string,originFileName:string,dataTable:string
 
-# run migration
-> db-migrate up
+> npx sequelize-cli model:generate --name Meta --attributes dataId:integer,name:string,koName:string,colType:string,maxLength:integer,floatLength:integer,dateFormat:string,trueValue:string,isNotNull:boolean,isUnique:boolean,isIndex:boolean
+
+# run migration (config 관리를 위해 별도 관리)
+> npx sequelize-cli db:migrate --config=./configs/db.config.json
 ```

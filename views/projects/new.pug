@@ -29,7 +29,7 @@ block content
           label(for='delimiter') 구분자
         .input-field.col.s6.l2
           select#encoding
-            each encoding in [{name: "UTF-8", value:"utf-8"}, {name: "EUC-KR", value: "euc-kr"}, {name: "CP949", value: "cp949"}]
+            each encoding in [{name: "UTF-8", value:"UTF-8"}, {name: "EUC-KR", value: "EUC-KR"}, {name: "CP949", value: "cp949"}]
               option(value=encoding.value) #{encoding.name}
           label(for='encoding') 인코딩
         .input-field.col.s6.l2
@@ -153,10 +153,18 @@ block scripts
       $(document).on("click", "#save-meta-btn", function() {
         var formData = new FormData();
         formData.append('file', targetFiels[0]);
+
+        var parseOption = {
+          delimiter: $("#delimiter").val(),
+          header: $("#has-header").is(":checked"),
+          encoding: $("#encoding").val()
+        };
+        formData.append('parseOption', JSON.stringify(parseOption));
+
         var meta = [];
         $(".meta-form-row").each(function(idx, row) {
           meta.push({
-            name: $(row).find(".name").val(),
+            name: $(row).find(".name").val() || "col" + (idx + 1),
             koName: $(row).find(".ko-name").val(),
             dataType: $(row).find(".data-type").val(),
             maxLength: $(row).find(".max-length").val(),
@@ -169,14 +177,14 @@ block scripts
           });
         });
         console.log(meta);
-        formData.append('meta', meta);        
+        formData.append('meta', JSON.stringify(meta));
         
         for (var pair of formData.entries()) {
           console.log(pair[0]+ ', ' + pair[1]); 
         }
 
         $.ajax({
-          url: '/datas/test',
+          url: '/datas',
           data: formData,
           type: 'POST',
           contentType: false,

@@ -5,6 +5,7 @@ var multer = require("multer");
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
+var DataManager = require("../lib/DataManager");
 var FileManager = require("../lib/FileManager");
 var MetaManager = require("../lib/MetaManager");
 
@@ -43,8 +44,18 @@ router.get("/", function (req, res, next) {
  */
 router.post("/", upload.single("file"), async function (req, res, next) {
   try {
-    const response = await FileManager.uploadFile(req.file);
-    console.log(response);
+    console.log(req.file);
+    const reqBody = req.body;
+    const parseOption = JSON.parse(reqBody.parseOption);
+    const meta = JSON.parse(reqBody.meta);
+
+    const data = await DataManager.create(req.file);
+    const metaList = await MetaManager.createAll(data, meta);
+
+    console.log(data);
+
+    // const response = await FileManager.uploadFile(req.file);
+    // console.log(response);
   } catch (err) {
     console.log(err);
   }
