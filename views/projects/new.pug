@@ -200,7 +200,7 @@ block scripts
           processData: false,
           success: function(d) {
             $(".loading").removeClass("active");
-            // location.href = "/projects/" + d.id;
+            location.href = "/projects/" + d.id;
           }, error: function(err) {
             $(".loading").removeClass("active");
             console.error(err);
