@@ -15,6 +15,7 @@ block content
         li.tab
           a(href='#test4') Test 4
     #tab-meta.col.s12
+      #meta-wrap
     #tab-preview.col.s12.table-responsive
       table.preview-table
         thead
@@ -31,17 +32,29 @@ block content
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
   script.
+    var metaTemplate;
     var rowsTemplate;
     $(document).ready(function(){
+      $(".loading").addClass("active");
+
       $('.tabs').tabs();
 
-      $.get("/javascripts/templates/data/rows.hbs", function(t) {
-        rowsTemplate = Handlebars.compile(t);
-        findData();
+      $.get("/javascripts/templates/data/meta.hbs", function(t1) {
+        metaTemplate = Handlebars.compile(t1);
+        $.get("/javascripts/templates/data/rows.hbs", function(t2) {
+          rowsTemplate = Handlebars.compile(t2);
+          findMetaWithData();
+        });
       });
 
-      function findData(options) {
+      function findMetaWithData(options) {
         $.getJSON("/datas/" + #{data.id}, function(d) {
+          var metaHtml = metaTemplate(d.data.metas);
+          $("#meta-wrap").html(metaHtml);
+
+          $(".loading").removeClass("active");
+
+
           var rowsHtml = rowsTemplate(d.rows[0]);
           $("#rows").html(rowsHtml);
         });

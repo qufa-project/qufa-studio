@@ -1,0 +1,55 @@
+<div class="table-responsive">
+  <table class="preview-table">
+    <thead>
+      <tr>
+        <th class="center-align">컬럼명(영문)</th>
+        <th class="center-align">컬럼명(국문)</th>
+        <th class="center-align">데이터타입</th>
+        <th class="center-align">최대길이</th>
+        <th class="center-align">소수점 자리수</th>
+        <th class="center-align">
+          날짜양식
+        </th>
+        <th class="center-align">True 값</th>
+        <th class="center-align">NOT NULL</th>
+        <th class="center-align">UNIQUE</th>
+        <th class="center-align">INDEX</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each this}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{koName}}</td>
+        <td>{{colType}}</td>
+        <td class="right-align">{{maxLength}}</td>
+        <td class="right-align">{{floatLength}}</td>
+        <td>{{dateFormat}}</td>
+        <td class="center-align">{{trueValue}}</td>
+        <td class="center-align">
+          {{#if isNotNull}}
+          O
+          {{else}}
+          X
+          {{/if}}
+        </td>
+        <td class="center-align">
+          {{#if isUnique}}
+          O
+          {{else}}
+          X
+          {{/if}}
+        </td>
+        <td class="center-align">
+          {{#if isIndex}}
+          O
+          {{else}}
+          X
+          {{/if}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
