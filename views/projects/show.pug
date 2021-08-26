@@ -23,10 +23,9 @@ block content
             each meta in data.metas
               th
                 | #{meta.name}
-                if meta.koName
-                  br
-                  small
-                    | #{meta.colType}
+                br
+                small
+                  | #{meta.colType}
         tbody#rows
 
 block scripts

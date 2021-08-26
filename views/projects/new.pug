@@ -94,7 +94,13 @@ block scripts
           for (var col of cols) {
             var value = rowItem[col.name];
             col.type = findType(value);
-            col.maxLen = Math.max(col.maxLen, ("" + value).length);
+            if (col.type == "number") {
+              col.maxLen = Math.max(10, ("" + value).length + 5);  
+            } else if (col.type == "string") {
+              col.maxLen = Math.max(50, ("" + value).length + 25);
+            } else {
+              col.maxLen = Math.max(col.maxLen, ("" + value).length);
+            }
           }
         }
 
@@ -194,7 +200,7 @@ block scripts
           processData: false,
           success: function(d) {
             $(".loading").removeClass("active");
-            location.href = "/projects/" + d.id;
+            // location.href = "/projects/" + d.id;
           }, error: function(err) {
             $(".loading").removeClass("active");
             console.error(err);
