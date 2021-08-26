@@ -38,6 +38,9 @@ module.exports = {
       is_index: {
         type: Sequelize.BOOLEAN,
       },
+      col_seq: {
+        type: Sequelize.INTEGER,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

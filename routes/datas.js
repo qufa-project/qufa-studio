@@ -8,6 +8,7 @@ var upload = multer({ storage: storage });
 var DataManager = require("../lib/DataManager");
 var FileManager = require("../lib/FileManager");
 var MetaManager = require("../lib/MetaManager");
+var RawDataManager = require("../lib/RawDataManager");
 
 const child_process = require("child_process");
 
@@ -49,12 +50,35 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     const parseOption = JSON.parse(reqBody.parseOption);
     const meta = JSON.parse(reqBody.meta);
 
-    const data = await DataManager.create(req.file);
+    const fileName = `${new Date().getTime()}_${req.file.originalname}`;
+    const data = await DataManager.create(fileName, req.file);
     const metaList = await MetaManager.createAll(data, meta);
+    const s3Res = await FileManager.uploadFile(fileName, req.file);
+    data.remotePath = `${s3Res}`;
+    await data.save();
 
-    console.log(data);
+    await RawDataManager.makeDataTable(data.dataTable, metaList);
+    const ls = child_process.spawn("node", [
+      "./scripts/parseCsv.js",
+      JSON.stringify({
+        dataId: data.id,
+        parseOption: parseOption,
+      }),
+    ]);
 
-    // const response = await FileManager.uploadFile(req.file);
+    ls.stdout.on("data", function (data) {
+      console.log("stdout: " + data);
+    });
+
+    ls.stderr.on("data", function (data) {
+      console.log("stderr: " + data);
+    });
+
+    ls.on("exit", function (code) {
+      console.log("exit: " + code);
+    });
+
+    //
     // console.log(response);
   } catch (err) {
     console.log(err);

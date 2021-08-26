@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasMany(models.Meta);
+      this.hasMany(models.Meta, { as: "metas", foreignKey: "data_id" });
     }
   }
   Data.init(
@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       remotePath: DataTypes.STRING,
       originFileName: DataTypes.STRING,
       dataTable: DataTypes.STRING,
+      status: DataTypes.STRING,
     },
     {
       sequelize,

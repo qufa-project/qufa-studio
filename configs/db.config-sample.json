@@ -1,5 +1,6 @@
 {
   "development": {
+    "user": "root",
     "username": "root",
     "password": null,
     "database": "database_development",
@@ -7,6 +8,7 @@
     "dialect": "mysql"
   },
   "test": {
+    "user": "root",
     "username": "root",
     "password": null,
     "database": "database_test",
@@ -14,6 +16,7 @@
     "dialect": "mysql"
   },
   "production": {
+    "user": "root",
     "username": "root",
     "password": null,
     "database": "database_production",

@@ -11,7 +11,8 @@
 
 ### [Sequelize ORM](https://sequelize.org/)
 
-- config/config-sample.json 참고하여 config.json 생성
+- config/db.config-sample.json 참고하여 db.config.json 생성
+  - Sequelize와 mysql2 동시 활용을 위해 user, username 컬럼 각각 정의
 
 ```sh
 # model 및 migration 생성

@@ -1,5 +1,6 @@
 {
   "development": {
+    "user": "iskim",
     "username": "iskim",
     "password": "rladlstjd",
     "database": "qufa",
@@ -21,6 +22,7 @@
     "dialect": "mysql"
   },
   "production": {
+    "user": "root",
     "username": "root",
     "password": null,
     "database": "database_production",

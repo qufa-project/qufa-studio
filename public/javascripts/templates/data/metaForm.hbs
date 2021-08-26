@@ -8,7 +8,12 @@
         <th class="center-align">데이터타입</th>
         <th class="center-align">최대길이</th>
         <th class="center-align">소수점 자리수</th>
-        <th class="center-align">날짜양식</th>
+        <th class="center-align">
+          날짜양식
+          <a class="tooltipped" data-position="bottom" data-tooltip="Ex) YYYY-MM-DD hh:mm:ss">
+            ?
+          </a>
+        </th>
         <th class="center-align">True 값</th>
         <th class="center-align">NOT NULL</th>
         <th class="center-align">UNIQUE</th>
@@ -36,7 +41,7 @@
                 {{#select type}}
                   <option value="string">문자</option>
                   <option value="number">숫자</option>
-                  <option value="date">날짜</option>
+                  <option value="date">날짜(시간)</option>
                   <option value="boolean">불리안</option>
                 {{/select}}
               </select>

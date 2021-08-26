@@ -26,6 +26,9 @@ module.exports = {
       data_table: {
         type: Sequelize.STRING,
       },
+      status: {
+        type: Sequelize.STRING(20),
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

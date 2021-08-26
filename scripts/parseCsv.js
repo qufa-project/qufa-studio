@@ -1,16 +1,41 @@
-var FileManager = require("../lib/FileManager")
-var MetaManager = require("../lib/MetaManager")
+var FileManager = require("../lib/FileManager");
+var MetaManager = require("../lib/MetaManager");
+var DataManager = require("../lib/DataManager");
+var RawDataManager = require("../lib/RawDataManager");
+
+const { Data, Meta } = require("../models");
 
 console.log(process.argv);
-const key = process.argv[2]
+const option = JSON.parse(process.argv[2]);
+console.log(option);
 
-run()
+run();
 
 async function run() {
   try {
-    const encoding = await MetaManager.detectEncoding(key);
-    const datas = await MetaManager.parseRecord(key, encoding);
-    console.log(datas);
+    const data = await Data.findOne({
+      where: { id: option.dataId },
+      include: [
+        {
+          model: Meta,
+          as: "metas",
+        },
+      ],
+    });
+
+    if (!option.encoding) {
+      option.encoding = await MetaManager.detectEncoding(data.remotePath);
+    }
+
+    if (!option.delimiter) {
+      option.delimiter = ",";
+    }
+
+    const rows = await MetaManager.parseRecord(data, option);
+    const result = await RawDataManager.insertData(data, rows);
+    data.status = DataManager.DATA_STATUS.done;
+
+    await data.save();
   } catch (err) {
     console.error(err);
   }

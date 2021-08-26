@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.Data);
+      this.belongsTo(models.Data, { foreignKey: "data_id" });
     }
   }
   Meta.init(
@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       isNotNull: DataTypes.BOOLEAN,
       isUnique: DataTypes.BOOLEAN,
       isIndex: DataTypes.BOOLEAN,
+      colSeq: DataTypes.INTEGER,
     },
     {
       sequelize,
