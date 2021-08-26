@@ -1,0 +1,49 @@
+extends ../layout
+
+block content
+  .row
+    .col.s12
+      ul.tabs
+        li.tab
+          a.active(href='#tab-meta') 메타데이터
+        li.tab
+          a(href='#tab-preview') 데이터 미리보기
+        li.tab
+          a(href='#test2') Test 2
+        li.tab.disabled
+          a(href='#test3') Disabled Tab
+        li.tab
+          a(href='#test4') Test 4
+    #tab-meta.col.s12
+    #tab-preview.col.s12.table-responsive
+      table.preview-table
+        thead
+          tr
+            each meta in data.metas
+              th
+                | #{meta.name}
+                if meta.koName
+                  br
+                  small
+                    | #{meta.colType}
+        tbody#rows
+
+block scripts
+  script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+  script.
+    var rowsTemplate;
+    $(document).ready(function(){
+      $('.tabs').tabs();
+
+      $.get("/javascripts/templates/data/rows.hbs", function(t) {
+        rowsTemplate = Handlebars.compile(t);
+        findData();
+      });
+
+      function findData(options) {
+        $.getJSON("/datas/" + #{data.id}, function(d) {
+          var rowsHtml = rowsTemplate(d.rows[0]);
+          $("#rows").html(rowsHtml);
+        });
+      }
+    });

@@ -21,8 +21,19 @@ const child_process = require("child_process");
  *       200:
  *         description: Returns a mysterious string.
  */
-router.get("/", function (req, res, next) {
-  res.json("data");
+router.get("/:id", async function (req, res, next) {
+  const data = await DataManager.findWithMeta(req.params.id);
+  const options = {
+    currentPage: req.query.currentPage || 1,
+    perPage: req.query.perPage || 50,
+    sort: req.query.sort || "id",
+    sortDir: req.query.sortDir || "asc",
+  };
+
+  const rows = await RawDataManager.search(data, options);
+  console.log(rows);
+
+  res.json({ data, rows });
 });
 
 /**

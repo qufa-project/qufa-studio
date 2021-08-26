@@ -1,0 +1,28 @@
+.tabs {
+  background: transparent;
+  .indicator {
+    top: 0;
+    bottom: initial;
+    background-color: #48dac5;
+  }
+
+  > li.tab {
+    > a {
+      color: #8494ae;
+
+      &.active,
+      &:hover {
+        color: #48dac5;
+      }
+
+      &.active {
+        font-weight: bold;
+      }
+
+      &:focus,
+      &:focus.active {
+        background-color: rgba(72, 218, 197, 0.1);
+      }
+    }
+  }
+}

@@ -55,3 +55,35 @@
     height: 20px;
   }
 }
+
+table.preview-table {
+  thead,
+  tbody {
+    tr {
+      .min {
+        white-space: nowrap;
+      }
+
+      &:first-child {
+        > th,
+        > td {
+          border-top: 1px solid #4e586b;
+        }
+      }
+
+      th,
+      td {
+        border-right: 1px solid #4e586b;
+        border-bottom: 1px solid #4e586b;
+
+        &:first-child {
+          border-left: 1px solid #4e586b;
+        }
+
+        small {
+          color: #8494ae;
+        }
+      }
+    }
+  }
+}
