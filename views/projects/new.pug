@@ -19,32 +19,34 @@ block content
           | Error! 
           span
           | .
-  .row
-    .input-field.col.s6.l2
-      select#delimiter
-        each delimiter in [{name: "Auto Detection", value:""}, {name: "Comma(,)", value:","}, {name: "Semi-colon(;)", value: ";"}, {name: "Colon(:)", value: ":"}, {name: "Tab(\\t)", value: "\\t"}]
-          option(value=delimiter.value) #{delimiter.name}
-      label(for='delimiter') 구분자
-    .input-field.col.s6.l2
-      select#encoding
-        each encoding in [{name: "UTF-8", value:"UTF-8"}, {name: "EUC-KR", value: "EUC-KR"}, {name: "CP949", value: "cp949"}]
-          option(value=encoding.value) #{encoding.name}
-      label(for='encoding') 인코딩
-    .input-field.col.s6.l2
-      select#header-lang
-        each lang in [{name: "한국어", value:"ko"}, {name: "영어", value: "en"}]
-          option(value=lang.value) #{lang.name}
-      label(for='header-lang') 언어
-    .input-field.col.s3.l2
-      p
-        label
-          input#has-header.filled-in(type='checkbox' checked)
-          span Header포함
-    .input-field.col.s3.l2
-      button#extract-btn.btn.waves-effect.waves-light(type='button')
-        | 메타추출
 
   .row.mt-2
+    .col.s12
+      .meta-config-wrap
+        .row
+          .input-field.col.s6.l2
+            select#delimiter
+              each delimiter in [{name: "Auto Detection", value:""}, {name: "Comma(,)", value:","}, {name: "Semi-colon(;)", value: ";"}, {name: "Colon(:)", value: ":"}, {name: "Tab(\\t)", value: "\\t"}]
+                option(value=delimiter.value) #{delimiter.name}
+            label(for='delimiter') 구분자
+          .input-field.col.s6.l2
+            select#encoding
+              each encoding in [{name: "UTF-8", value:"UTF-8"}, {name: "EUC-KR", value: "EUC-KR"}, {name: "CP949", value: "cp949"}]
+                option(value=encoding.value) #{encoding.name}
+            label(for='encoding') 인코딩
+          .input-field.col.s6.l2
+            select#header-lang
+              each lang in [{name: "한국어", value:"ko"}, {name: "영어", value: "en"}]
+                option(value=lang.value) #{lang.name}
+            label(for='header-lang') 언어
+          .input-field.col.s3.l2
+            p
+              label
+                input#has-header.filled-in(type='checkbox' checked)
+                span Header포함
+          .input-field.col.s3.l2
+            button#extract-btn.btn.waves-effect.waves-light(type='button')
+              | 메타추출
     .col.s12
       .csv-cols-wrap
         
@@ -182,6 +184,8 @@ block scripts
           console.log(pair[0]+ ', ' + pair[1]); 
         }
 
+        $(".loading").addClass("active");
+  
         $.ajax({
           url: '/datas',
           data: formData,
@@ -189,8 +193,10 @@ block scripts
           contentType: false,
           processData: false,
           success: function(d) {
-            console.log(d);
+            $(".loading").removeClass("active");
+            location.href = "/projects/" + d.id;
           }, error: function(err) {
+            $(".loading").removeClass("active");
             console.error(err);
           }
         })

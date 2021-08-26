@@ -1,6 +1,22 @@
-table.meta-form-table {
-  background-color: #373740;
+.meta-config-wrap {
+  background-color: #25262c;
+  padding: 1rem;
 
+  > .row {
+    margin-bottom: 0;
+
+    .dropdown-trigger {
+      color: #fff !important;
+    }
+
+    .input-field {
+      color: #fff;
+      margin-bottom: 0;
+    }
+  }
+}
+
+table.meta-form-table {
   thead,
   tbody {
     > tr:first-child {

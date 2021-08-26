@@ -1,4 +1,5 @@
 @import "components/nav";
+@import "components/spinner";
 
 @import "app/file_form";
 @import "app/meta";
@@ -18,6 +19,10 @@ header,
 main,
 footer {
   padding-left: 300px;
+}
+
+table {
+  background-color: #25262c;
 }
 
 @media only screen and (max-width: 992px) {
