@@ -35,7 +35,8 @@ block content
           each row in data.rows
             tr
               td.text-center=row.id
-              td=row.originFileName
+              td
+                a(href="/projects/" + row.id)=row.originFileName
               td.text-center=row.contentType
               td.text-right=formatBytes(row.fileSize)
               td.text-right=""
