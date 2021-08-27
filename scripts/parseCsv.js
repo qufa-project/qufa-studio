@@ -33,7 +33,7 @@ async function run() {
 
     const rows = await MetaManager.parseRecord(data, option);
     const result = await RawDataManager.insertData(data, rows);
-    data.status = DataManager.DATA_STATUS.done;
+    data.status = DataManager.DATA_STATUS.done.stat;
 
     await data.save();
   } catch (err) {

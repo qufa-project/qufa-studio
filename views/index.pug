@@ -10,7 +10,7 @@ block content
   .row
     .col.m8.input-field
       h6
-        | 총 512건
+        | 총 #{new Intl.NumberFormat().format(data.count)}건
     .col.m4.input-field
       i.material-icons.prefix search
       input#icon_prefix.validate(type='text')
@@ -22,17 +22,28 @@ block content
         thead
           tr
             th.text-center.w60 
-              i.check-option.material-icons.prefix check_box_outline_blank
-            th 데이터셋명
-            th Rows
+              | ID
+            th 파일명
+            th 데이터 타입
             th Size
-            th.w140 데이터품질
-            th.w140 오류 지수
-            th 데이터 유형
+            th Rows
+            th 상태
             th 데이터 등록일
             th
             th
         tbody
+          each row in data.rows
+            tr
+              td.text-center=row.id
+              td=row.originFileName
+              td.text-center=row.contentType
+              td.text-right=formatBytes(row.fileSize)
+              td.text-right=""
+              td.text-center=dataStatus[row.status].message
+              td.text-center=moment(row.createdAt).format("YY/MM/DD")
+              td
+              td
+
           tr
             td.text-center
               i.check-option.material-icons.prefix check_box_outline_blank
@@ -54,16 +65,9 @@ block content
               | CSV
             td.text-center
               | 2021-08-09 12:24:32
-          tr
-            td.text-center
-              i.check-option.material-icons.prefix check_box_outline_blank
-            td.text-center
-            td $3.76
-          tr
-            td.text-center
-              i.check-option.material-icons.prefix check_box_outline_blank
-            td.text-center Lollipop
-            td $7.00
+
+    include fragments/_pagination
+    +pagination(pageOption)
 
 block scripts
   script(src='https://cdn.amcharts.com/lib/4/core.js')

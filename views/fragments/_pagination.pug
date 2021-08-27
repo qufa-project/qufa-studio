@@ -1,0 +1,41 @@
+- var p = {currentPage: 4, total: 10, basePath: "/projects"}
+
+mixin pagination(p)
+  .col.s12.center-align
+    ul.pagination
+      - if(p.currentPage > 1)
+        li
+          a(href=util.urlHelper(p, null))
+            i.material-icons keyboard_double_arrow_left
+        li
+          a(href=util.urlHelper(p, (p.currentPage - 1)!=1?(p.currentPage - 1): null))
+            i.material-icons chevron_left
+      - else
+        li.disabled
+          a(href='#!')
+            i.material-icons keyboard_double_arrow_left
+        li.disabled
+          a(href='#!')
+            i.material-icons chevron_left
+      - for(var i = p.currentPage-3; i <= p.currentPage + 3; ++i)
+        - if (i <= p.total && i > 0)
+          - if (i !== p.currentPage)
+            li.waves-effect
+              a(href=util.urlHelper(p, i!=1 ? i: null))=i
+          - else
+            li.active
+              a(href='#!')=i
+      - if(p.currentPage < p.total)
+        li.waves-effect
+          a(href=util.urlHelper(p, p.currentPage + 1))
+            i.material-icons chevron_right
+        li.waves-effect
+          a(href=util.urlHelper(p, p.total))
+            i.material-icons keyboard_double_arrow_right
+      - else
+        li.disabled
+          a(href='#!')
+            i.material-icons chevron_right
+        li.disabled
+          a(href='#!')
+            i.material-icons keyboard_double_arrow_right

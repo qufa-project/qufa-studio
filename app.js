@@ -26,6 +26,8 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 
 var app = express();
+app.locals.moment = require("moment");
+app.locals.util = require("./utils");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
