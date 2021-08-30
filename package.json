@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "mocha --timeout 10000",
+    "test": "mocha --timeout 100000",
     "start": "nodemon ./bin/www & npm run scss",
     "scss": "sass --watch ./public/stylesheets/style.scss ./public/stylesheets/style.css"
   },

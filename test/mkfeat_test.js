@@ -170,6 +170,13 @@ describe('Mkfeat Manager', function() {
         }
       })
     })
-    
+  })
+
+  describe('Mkfeat Manager batch job', function() {
+    it('batch', async function() {
+      const mkfeatManager = new MkfeatManager({endpoint: config.mkfeat.url});
+      const result = await mkfeatManager.batchJob(SAMPLE_DATA);
+      expect(result).to.be.an('Array')
+    })
   })
 })
