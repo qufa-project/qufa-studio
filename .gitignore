@@ -68,3 +68,4 @@ typings/
 
 # config.js
 config.js
+db.config.json
