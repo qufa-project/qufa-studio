@@ -1,0 +1,49 @@
+<div class="table-responsive">
+  <table class="preview-table">
+    <thead>
+      <tr>
+        <th class="min">컬럼명</th>
+        <th class="min">distinctCnt</th>
+        <th class="min">uniqueCnt</th>
+        <th class="min">duplicateCnt</th>
+        <th class="min">nullCnt</th>
+        <th class="min">frquentMaxVal</th>
+        <th class="min">frquentMinVal</th>
+        <th class="min">numMinVal</th>
+        <th class="min">numMaxVal</th>
+        <th class="min">numMeanVal</th>
+        <th class="min">numMedianVal</th>
+        <th class="min">rowCnt</th>
+        <th class="min">strAvgLenVal</th>
+        <th class="min">strMaxLenVal</th>
+        <th class="min">strMinLenVal</th>
+        <th class="min">trueCnt</th>
+        <th class="min">falseCnt</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each this}}
+      <tr>
+        <td>{{columnName}}</td>
+        <td>{{distinctCnt}}</td>
+        <td>{{uniqueCnt}}</td>
+        <td>{{duplicateCnt}}</td>
+        <td>{{nullCnt}}</td>
+        <td>{{frquentMaxVal}}</td>
+        <td>{{frquentMinVal}}</td>
+        <td>{{numMinVal}}</td>
+        <td>{{numMaxVal}}</td>
+        <td>{{numMeanVal}}</td>
+        <td>{{numMedianVal}}</td>
+        <td>{{rowCnt}}</td>
+        <td>{{strAvgLenVal}}</td>
+        <td>{{strMaxLenVal}}</td>
+        <td>{{strMinLenVal}}</td>
+        <td>{{trueCnt}}</td>
+        <td>{{falseCnt}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

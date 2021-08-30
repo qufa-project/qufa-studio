@@ -1,9 +1,12 @@
 var express = require("express");
 var router = express.Router();
 var multer = require("multer");
+const axios = require("axios");
 
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
+
+const profileConfig = require("../configs/config").profiler;
 
 var DataManager = require("../lib/DataManager");
 var FileManager = require("../lib/FileManager");
@@ -36,6 +39,17 @@ router.get("/:id", async function (req, res, next) {
   res.json({ data, rows });
 });
 
+router.get("/:id/profile", async function (req, res, next) {
+  const data = await DataManager.find(req.params.id);
+
+  const response = await axios.get(
+    `${profileConfig.baseUrl}/profile/${data.dataTable}`
+  );
+  console.log(response);
+
+  res.json(response.data);
+});
+
 /**
  * @openapi
  * /datas:
@@ -64,11 +78,15 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     const fileName = `${new Date().getTime()}_${req.file.originalname}`;
     const data = await DataManager.create(fileName, req.file);
     const metaList = await MetaManager.createAll(data, meta);
-    const s3Res = await FileManager.uploadFile(fileName, req.file);
+    console.log(data);
+    console.log(data.id);
+    const s3Res = await FileManager.uploadFile(data.id, fileName, req.file);
+    console.log(s3Res);
     data.remotePath = `${s3Res}`;
     await data.save();
 
     await RawDataManager.makeDataTable(data.dataTable, metaList);
+
     const ls = child_process.spawn("node", [
       "./scripts/parseCsv.js",
       JSON.stringify({

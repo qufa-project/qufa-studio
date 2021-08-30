@@ -9,7 +9,7 @@ block content
         li.tab
           a(href='#tab-preview') 데이터 미리보기
         li.tab
-          a(href='#test2') Profile
+          a(href='#tab-profile' data-tab='profile') Profile
         li.tab
           a(href='#test3') 특징추출
         li.tab
@@ -31,12 +31,16 @@ block content
                 small
                   | #{meta.colType}
         tbody#rows
+    #tab-profile
+      #profile-wrap
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
   script.
     var metaTemplate;
     var rowsTemplate;
+    var profileTemplate;
+
     $(document).ready(function(){
       $(".loading").addClass("active");
 
@@ -46,7 +50,11 @@ block scripts
         metaTemplate = Handlebars.compile(t1);
         $.get("/javascripts/templates/data/rows.hbs", function(t2) {
           rowsTemplate = Handlebars.compile(t2);
-          findMetaWithData();
+
+          $.get("/javascripts/templates/data/profile.hbs", function(t3) {
+            profileTemplate = Handlebars.compile(t3);
+            findMetaWithData();
+          });
         });
       });
 
@@ -55,11 +63,30 @@ block scripts
           var metaHtml = metaTemplate(d.data.metas);
           $("#meta-wrap").html(metaHtml);
 
-          $(".loading").removeClass("active");
-
-
           var rowsHtml = rowsTemplate(d.rows[0]);
           $("#rows").html(rowsHtml);
+
+          $(".loading").removeClass("active");
         });
       }
+
+
+      var profileResult;
+
+      $('ul.tabs').on('click', 'a', function(e) {
+        var selectedTab = $(this).data('tab');
+        if (selectedTab) {
+          if (selectedTab == "profile" && !profileResult) {
+            $.getJSON("/datas/" + #{data.id} + "/profile", function(d) {
+              console.log(d);
+              if (d && d.status == "success") {
+                profileResult = d.results;
+
+                var profileHtml = profileTemplate(profileResult);
+                $("#profile-wrap").html(profileHtml);
+              }
+            });
+          }
+        }
+      });
     });
