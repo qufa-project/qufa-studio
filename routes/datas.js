@@ -125,6 +125,75 @@ router.post("/test", upload.single("file"), async function (req, res, next) {
 
 /**
  * @openapi
+ * /datas/{id}/importance:
+ *   post:
+ *     description: data id와 request body를 통해서 중요도 분석을 요청합니다.
+ *     parameters:
+ *      - in: path
+ *        required: true
+ *        name: id
+ *        schema:
+ *         type: integer
+ *        description: 중요도 분석을 위해 Target meta ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               metaId:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Returns a mysterious string.
+ */
+router.post("/:id/importance", async function (req, res, next) {
+  try {
+    const dataId = req.params.id;
+    const metaId = req.body.metaId;
+
+    const data = await DataManager.findWithMeta(dataId);
+
+    if(data.metas.filter(el => el.id === metaId).length <= 0) {
+      throw new Error("Cannot find meta which is included in dataId");
+    }
+
+    const ls = child_process.spawn("node", [
+      "./scripts/importance.js",
+      JSON.stringify({
+        dataId: data.id,
+        metaId: metaId
+      }),
+    ]);
+
+    ls.stdout.on("data", function (data) {
+      console.log("stdout: " + data);
+    });
+
+    ls.stderr.on("data", function (data) {
+      console.log("stderr: " + data);
+    });
+
+    ls.on("exit", function (code) {
+      console.log("exit: " + code);
+    });
+
+    res.json({ id: data.id });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ err: err });
+  }
+});
+
+router.post("/test", upload.single("file"), async function (req, res, next) {
+  console.log(req.file);
+  console.log(req.body.meta);
+  const formData = req.body;
+  res.json("upload success");
+});
+
+/**
+ * @openapi
  * /datas/meta:
  *   get:
  *     description: Welcome to swagger-jsdoc!
