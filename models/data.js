@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
       originFileName: DataTypes.STRING,
       dataTable: DataTypes.STRING,
       status: DataTypes.STRING,
-      mkfeatProgress: DataTypes.INTEGER
+      hasProfile: DataTypes.BOOLEAN,
+      mkfeatProgress: DataTypes.INTEGER,
     },
     {
       sequelize,
