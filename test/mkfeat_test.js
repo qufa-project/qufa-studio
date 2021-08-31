@@ -109,25 +109,13 @@ describe('Mkfeat Manager', function() {
       }
     })
 
-    it('Get Status With Invalid Tid', async function() {
-      try {
-        const result = await mkfeatManager.getStatus(999999)
-        expect(result).to.be.null
-      } catch (err) {
-        expect(err.response.status).to.equal(400)
-        expect(err.response.data.errcode).to.equal('ERR_NO_TASK')
-      }
-    })
-
     describe('Call apis with Tids', function() {
-      let tid;
       
       it('Call Extract With Completely Valid Datum', async function() {
         try {
-          const result = await mkfeatManager.extract(SAMPLE_DATA)
-          expect(result.status).to.equal(200)
-          expect(result.data.tid).to.not.null
-          tid = result.data.tid
+          const tid = await mkfeatManager.extract(SAMPLE_DATA)
+          expect(tid).to.not.null
+          expect(tid).to.be.a('number')
         } catch (err) {
           expect(err).to.be.null
         }
@@ -135,35 +123,36 @@ describe('Mkfeat Manager', function() {
 
       it(`tid`, function() {
         //do nothing
-        console.log(`=============${tid}============`)
+        console.log(`=============${mkfeatManager.getTid()}============`)
       })
 
       it('Get Status With valid Tid', async function() {
         try {
-          const result = await mkfeatManager.getStatus(tid)
-          expect(result.status).to.equal(200)
-          expect(result.data.progress).to.be.a('number')
+          const progress = await mkfeatManager.getProgress()
+          expect(progress).to.be.a('number')
         } catch (err) {
           console.log(err)
           expect(err).to.be.null
         }
       })
 
-      it('Get FeatureInfo With valid Tid', async function() {
-        try {
-          const result = await mkfeatManager.getStatus(tid)
-          expect(result.status).to.equal(200)
-          expect(result.data.progress).to.be.a('number')
-        } catch (err) {
-          expect(err).to.be.null
-        }
-      })
-
-      delay(2000)
+      // 시간이 오래 걸리는 작업으로 필요시 주석 해제 하여 테스트 하세요
+      
+      // delay(20000)
+      // it('Get FeatureInfo With valid Tid', async function() {
+      //   try {
+      //     const featureInfo = await mkfeatManager.getFeatureinfo()
+      //     console.log(featureInfo)
+      //     expect(featureInfo).to.be.an('Array')
+      //   } catch (err) {
+      //     console.log(err.response.data)
+      //     expect(err).to.be.null
+      //   }
+      // })
 
       it('delete job with tid', async function() {
         try {
-          const result = await mkfeatManager.deleteJob(tid)
+          const result = await mkfeatManager.deleteJob()
           expect(result.status).to.equal(200)
         } catch (err) {
           expect(err).to.be.null
