@@ -50,11 +50,15 @@ async function run() {
       }
     }
 
-    const result = await mkfeatManager.batchImportanceJob(payload, async (progress) => {
+    const results = await mkfeatManager.batchImportanceJob(payload, async (progress) => {
       console.log(progress)
     })
 
-    console.log(result)
+    for(let i = 0; i < inputs.length; i++ ) {
+      inputs[i]["importance"] = results[i]
+    }
+
+    console.log(inputs);
     
     process.exit(0);
   } catch (err) {
