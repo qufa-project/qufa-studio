@@ -63,13 +63,66 @@ const SAMPLE_DATA =  {
   ]
 }
 
+const IMPORTANCE_SAMPLE_DATA =  {
+  "data": {
+      "uri": "s3://qufa-test/mkfeat/nyc_taxi_train_test_10k.csv",
+      "columns": [
+          {
+              "name": "id",
+              "type": "string"
+          },
+          {
+              "name": "vendor_id",
+              "type": "string"
+          },
+          {
+              "name": "pickup_datetime",
+              "type": "string"
+          },
+          {
+              "name": "passenger_count",
+              "type": "string"
+          },
+          {
+              "name": "pickup_longitude",
+              "type": "number"
+          },
+          {
+              "name": "pickup_latitude",
+              "type": "number"
+          },
+          {
+              "name": "dropoff_longitude",
+              "type": "number"
+          },
+          {
+              "name": "dropoff_latitude",
+              "type": "number"
+          },
+          {
+              "name": "store_and_fwd_flag",
+              "type": "string"
+          },
+          {
+              "name": "trip_duration",
+              "type": "number",
+              "label": true
+          },
+          {
+              "name": "test_train",
+              "type": "string"
+          }
+      ]
+  }
+}
+
 function delay(interval) {
   return it('should delay', done => {
     setTimeout(() => done(), interval)
   }).timeout(interval + 100) // The extra 100ms should guarantee the test will not fail due to exceeded timeout
 }
 
-describe('Mkfeat Manager', function() {
+describe('Mkfeat Manager - Feature extract', function() {
   describe('Create Manager', function() {
     const mkfeatManager = new MkfeatManager({
       endpoint: config.mkfeat.url
@@ -123,7 +176,7 @@ describe('Mkfeat Manager', function() {
 
       it(`tid`, function() {
         //do nothing
-        console.log(`=============${mkfeatManager.getTid()}============`)
+        console.log(`=============${mkfeatManager.getExtractTid()}============`)
       })
 
       it('Get Status With valid Tid', async function() {
@@ -168,6 +221,109 @@ describe('Mkfeat Manager', function() {
         console.log(`${progress}`)
       });
       expect(result).to.be.an('Array')
+    })
+  })
+})
+
+describe('Mkfeat Manager - Importance', function() {
+  describe('Create Manager', function() {
+    const mkfeatManager = new MkfeatManager({
+      endpoint: config.mkfeat.url
+    })
+
+    it('Create Manager With options', function() {
+      const option = mkfeatManager.options()
+      expect(option.endpoint).to.equal(config.mkfeat.url)
+    })
+    
+    it('Call Importance With Invalid data', async function() {
+      try {
+        const result = await mkfeatManager.importance({
+          data: 'invalid Data',
+          columns: [],
+        })
+        expect(result).to.be.null
+      } catch (err) {
+        expect(err).to.not.be.null
+        expect(err.response.status).to.equal(400)
+        expect(err.response.data.errcode).to.equal('ERR_INVALID_ARG')
+      }
+    })
+
+    it('Call Importance With Valid Uri But Column count', async function() {
+      try {
+        const wrongSampleData = JSON.parse(JSON.stringify(SAMPLE_DATA))
+        wrongSampleData.data.columns.pop()
+
+        const result = await mkfeatManager.importance(wrongSampleData)
+        expect(result).to.be.null
+      } catch (err) {
+        expect(err).to.not.be.null
+        expect(err.response.status).to.equal(400)
+        expect(err.response.data.errcode).to.equal('ERR_LABEL_NOT_FOUND')
+      }
+    })
+
+    describe('Call apis with Tids', function() {
+      
+      it('Call Importance With Completely Valid Datum', async function() {
+        try {
+          const tid = await mkfeatManager.importance(IMPORTANCE_SAMPLE_DATA)
+          expect(tid).to.not.null
+          expect(tid).to.be.a('number')
+        } catch (err) {
+          console.error(err)
+          expect(err).to.be.null
+        }
+      })
+
+      it(`tid`, function() {
+        //do nothing
+        console.log(`=============${mkfeatManager.getImportanceTid()}============`)
+      })
+
+      it('Get Status With valid Tid', async function() {
+        try {
+          const progress = await mkfeatManager.getImportanceProgress()
+          expect(progress).to.be.a('number')
+        } catch (err) {
+          console.log(err)
+          expect(err).to.be.null
+        }
+      })
+
+      // 시간이 오래 걸리는 작업으로 필요시 주석 해제 하여 테스트 하세요
+
+      // delay(20000)
+      // it('Get Importance Result With valid Tid', async function() {
+      //   try {
+      //     const featureInfo = await mkfeatManager.getImportanceResult()
+      //     console.log(featureInfo)
+      //     expect(featureInfo).to.be.an('Array')
+      //   } catch (err) {
+      //     console.log(err.response.data)
+      //     expect(err).to.be.null
+      //   }
+      // })
+
+      it('delete job with tid', async function() {
+        try {
+          const result = await mkfeatManager.deleteImportanceJob()
+          expect(result.status).to.equal(200)
+        } catch (err) {
+          expect(err).to.be.null
+        }
+      })
+    })
+
+    describe('Mkfeat Manager batch job', function () {
+      it('batch', async function () {
+        const mkfeatManager = new MkfeatManager({ endpoint: config.mkfeat.url });
+        const result = await mkfeatManager.batchImportanceJob(IMPORTANCE_SAMPLE_DATA, async (progress) => {
+          console.log(`${progress}`)
+        });
+        expect(result).to.be.an('Array')
+      })
     })
   })
 })
