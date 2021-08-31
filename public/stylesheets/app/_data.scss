@@ -88,7 +88,35 @@ table.preview-table {
   }
 }
 
-.num-chart {
-  width: 100%;
-  height: 100px;
+.num-chart-wrap {
+  padding: 0 !important;
+
+  .num-chart {
+    max-width: 100%;
+    min-width: 200px;
+    height: 140px;
+    position: relative;
+
+    .profile-value {
+      padding: 4px 8px !important;
+      font-size: 12px;
+      font-weight: normal;
+      min-width: 200px;
+      position: absolute;
+      top: 50%;
+      -webkit-transform: translate(0%, -50%);
+      -ms-transform: translate(0%, -50%);
+      transform: translate(0%, -50%);
+
+      span {
+        min-width: 58px;
+        display: inline-block;
+
+        &.value {
+          min-width: 120px;
+          text-align: right;
+        }
+      }
+    }
+  }
 }
