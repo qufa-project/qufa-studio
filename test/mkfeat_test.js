@@ -128,7 +128,7 @@ describe('Mkfeat Manager', function() {
 
       it('Get Status With valid Tid', async function() {
         try {
-          const progress = await mkfeatManager.getProgress()
+          const progress = await mkfeatManager.getExtractProgress()
           expect(progress).to.be.a('number')
         } catch (err) {
           console.log(err)
@@ -137,7 +137,7 @@ describe('Mkfeat Manager', function() {
       })
 
       // 시간이 오래 걸리는 작업으로 필요시 주석 해제 하여 테스트 하세요
-      
+
       // delay(20000)
       // it('Get FeatureInfo With valid Tid', async function() {
       //   try {
@@ -152,7 +152,7 @@ describe('Mkfeat Manager', function() {
 
       it('delete job with tid', async function() {
         try {
-          const result = await mkfeatManager.deleteJob()
+          const result = await mkfeatManager.deleteExtractJob()
           expect(result.status).to.equal(200)
         } catch (err) {
           expect(err).to.be.null
@@ -164,7 +164,9 @@ describe('Mkfeat Manager', function() {
   describe('Mkfeat Manager batch job', function() {
     it('batch', async function() {
       const mkfeatManager = new MkfeatManager({endpoint: config.mkfeat.url});
-      const result = await mkfeatManager.batchJob(SAMPLE_DATA);
+      const result = await mkfeatManager.batchExtractJob(SAMPLE_DATA, async (progress) => {
+        console.log(`${progress}`)
+      });
       expect(result).to.be.an('Array')
     })
   })
