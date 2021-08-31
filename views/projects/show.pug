@@ -7,7 +7,7 @@ block content
         li.tab
           a.active(href='#tab-meta') 메타데이터
         li.tab
-          a(href='#tab-preview') 데이터 미리보기
+          a(href='#tab-preview' data-tab='preview') 데이터 미리보기
         li.tab
           a(href='#tab-profile' data-tab='profile') Profile
         li.tab
@@ -25,11 +25,15 @@ block content
         thead
           tr
             each meta in data.metas
-              th
+              th.min
                 | #{meta.name}
                 br
                 small
                   | #{meta.colType}
+          tr
+            each meta in data.metas
+              th.num-chart-wrap
+                .num-chart(id="profile-" + meta.name)
         tbody#rows
     #tab-profile.col.s12
       #profile-wrap
@@ -44,6 +48,8 @@ block scripts
     var metaTemplate;
     var rowsTemplate;
     var profileTemplate;
+
+    am4core.addLicense("CH204832145");
 
     $(document).ready(function(){
       $(".loading").addClass("active");
@@ -80,7 +86,7 @@ block scripts
       $('ul.tabs').on('click', 'a', function(e) {
         var selectedTab = $(this).data('tab');
         if (selectedTab) {
-          if (selectedTab == "profile" && !profileResult) {
+          if (!profileResult) {
             $.getJSON("/datas/" + #{data.id} + "/profile", function(d) {
               console.log(d);
               if (d && d.status == "success") {
@@ -88,9 +94,143 @@ block scripts
 
                 var profileHtml = profileTemplate(profileResult);
                 $("#profile-wrap").html(profileHtml);
+
+                renderProfileChart(profileResult);
               }
             });
           }
         }
       });
+
+      function renderProfileChart(results) {
+        console.log(results);
+        for (var i = 1; i < results.length; i++) {
+          var result = results[i];
+          var profileColId = "profile-" + result.columnName;
+
+          if (result.rowCnt == result.uniqueCnt) {
+            var uniqueHtml = [];
+            uniqueHtml.push("<div class='profile-value'>");
+            uniqueHtml.push("<h4 class='center-align'>" + result.uniqueCnt + "</h4>");
+            uniqueHtml.push("<div class='center-align'><small>Unique values</small></div>");
+            uniqueHtml.push("</div>");
+
+            $("#" + profileColId).html(uniqueHtml.join(""));
+          } else if (result.vfs && result.vfs.length) {
+            renderBarChart(profileColId, result.vfs);
+          } else if (result.columnType == "DECIMAL") {
+            var numberHtml = [];
+            numberHtml.push("<div class='profile-value'>");
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Max: </span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMaxVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Min: </span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMinVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Mean</span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMeanVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Median</span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMedianVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+            numberHtml.push("</div>");
+
+            $("#" + profileColId).html(numberHtml.join(""));
+          } else {
+            var stringHtml = [];
+            stringHtml.push("<div class='profile-value'>");
+            stringHtml.push(" <div>");
+            stringHtml.push(" <span>Distinct: </span>");
+            stringHtml.push(" <span class='value'>");
+            stringHtml.push(result.distinctCnt.toLocaleString());
+            stringHtml.push(" </span>");
+            stringHtml.push(" </div>");
+
+            stringHtml.push(" <div>");
+            stringHtml.push(" <span>Duplicate: </span>");
+            stringHtml.push(" <span class='value'>");
+            stringHtml.push(result.duplicateCnt.toLocaleString());
+            stringHtml.push(" </span>");
+            stringHtml.push(" </div>");
+            numberHtml.push("</div>");
+
+            $("#" + profileColId).html(stringHtml.join(""));
+
+            console.log(result);
+          }
+        }
+      }
+
+      function renderBarChart(chartId, items) {
+        am4core.ready(function() {
+          am4core.useTheme(am4themes_animated);
+          // Themes end
+          // Create chart instance
+
+          var chart = am4core.create(chartId, am4charts.XYChart);
+          chart.data = items;
+          
+          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+          categoryAxis.autoGridCount = true;
+          categoryAxis.dataFields.category = "columnGroupVal";
+          categoryAxis.renderer.grid.template.location = 0;
+          categoryAxis.renderer.minGridDistance = 80;
+          
+          // category axis label 길이 제한
+          var label = categoryAxis.renderer.labels.template;
+          label.fill = am4core.color("#fff");
+          label.fontWeight = "200";
+          label.truncate = true;
+          label.maxWidth = 110;
+          label.fontSize = 10;
+          
+
+          //- categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
+          //-   if (target.dataItem && target.dataItem.index & 2 == 2) {
+          //-     return dy + 25;
+          //-   }
+          //-   return dy;
+          //- });
+
+          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+          valueAxis.renderer.line.disabled = true; //disables axis line
+          valueAxis.renderer.labels.template.disabled = true; //disables labels
+          valueAxis.renderer.grid.template.disabled = true;  //disables grid
+
+          
+          // Create series
+          var series = chart.series.push(new am4charts.ColumnSeries());
+          series.dataFields.valueY = "columnGroupCount";
+          series.dataFields.categoryX = "columnGroupVal";
+          series.name = "Count";
+          series.columns.template.fillOpacity = .8;
+          series.columns.template.fill = am4core.color("#48dac5");
+          series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+          
+          series.tooltip.getFillFromObject = false;
+          series.tooltip.background.fill = am4core.color("#fff");
+          series.tooltip.fontWeight = "200";
+          series.tooltip.label.fill = am4core.color("#000");
+          series.tooltip.label.fontSize = 10;
+
+          var columnTemplate = series.columns.template;
+          columnTemplate.strokeWidth = 1;
+          columnTemplate.strokeOpacity = 0.3;
+        });
+      }
     });
