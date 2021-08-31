@@ -34,20 +34,22 @@ router.get("/:id", async function (req, res, next) {
   };
 
   const rows = await RawDataManager.search(data, options);
-  console.log(rows);
-
   res.json({ data, rows });
 });
 
 router.get("/:id/profile", async function (req, res, next) {
   const data = await DataManager.find(req.params.id);
 
-  const response = await axios.get(
-    `${profileConfig.baseUrl}/profile/${data.dataTable}`
-  );
-  console.log(response);
+  try {
+    const response = await axios.get(
+      `${profileConfig.baseUrl}/profile/${data.dataTable}`
+    );
+    console.log(response);
 
-  res.json(response.data);
+    res.json(response.data);
+  } catch (err) {
+    res.json(null);
+  }
 });
 
 /**
