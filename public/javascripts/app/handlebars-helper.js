@@ -43,3 +43,12 @@ Handlebars.registerHelper("ifCond", function (v1, operator, v2, options) {
       return options.inverse(this);
   }
 });
+
+Handlebars.registerHelper("fixFloat", function (distance, f) {
+  if (typeof distance == "number" && !Number.isInteger(distance)) {
+    f = f || 2;
+    return distance.toFixed(2);
+  }
+
+  return distance;
+});

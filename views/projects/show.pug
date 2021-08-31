@@ -31,11 +31,15 @@ block content
                 small
                   | #{meta.colType}
         tbody#rows
-    #tab-profile
+    #tab-profile.col.s12
       #profile-wrap
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+  script(src='/javascripts/app/handlebars-helper.js')
+  script(src='https://cdn.amcharts.com/lib/4/core.js')
+  script(src='https://cdn.amcharts.com/lib/4/charts.js')
+  script(src='https://cdn.amcharts.com/lib/4/themes/animated.js')
   script.
     var metaTemplate;
     var rowsTemplate;
