@@ -29,12 +29,12 @@ router.get("/:id", async function (req, res, next) {
   const options = {
     currentPage: req.query.currentPage || 1,
     perPage: req.query.perPage || 50,
-    sort: req.query.sort || "id",
+    sortCol: req.query.sortCol || "id",
     sortDir: req.query.sortDir || "asc",
   };
 
-  const rows = await RawDataManager.search(data, options);
-  res.json({ data, rows });
+  const results = await RawDataManager.search(data, options);
+  res.json({ data, results });
 });
 
 router.get("/:id/profile", async function (req, res, next) {
@@ -154,27 +154,31 @@ router.post("/:id/importance", async function (req, res, next) {
 
     const data = await DataManager.findWithMeta(dataId);
 
-    const target = data.metas.filter(el => el.id === metaId)
-    if(target.length <= 0) {
+    const target = data.metas.filter((el) => el.id === metaId);
+    if (target.length <= 0) {
       throw new Error("Cannot find meta which is included in dataId");
     }
 
     // Importance를 돌리기 위한 조건이 만족하는지 확인
-    const dataTypesForImportance = ["number", "boolean"]
-    if(!dataTypesForImportance.includes(target[0].colType)) {
-      throw new Error("Target colType should be 'number' or 'boolean")
+    const dataTypesForImportance = ["number", "boolean"];
+    if (!dataTypesForImportance.includes(target[0].colType)) {
+      throw new Error("Target colType should be 'number' or 'boolean");
     }
 
-    const notTargetCols = data.metas.filter(el => dataTypesForImportance.includes(el.colType) && el.id != metaId)
-    if(notTargetCols.length <= 0) {
-      throw new Error("There are no column to calculate importance. Should have at least one 'number' or 'boolean' column except target column.")
+    const notTargetCols = data.metas.filter(
+      (el) => dataTypesForImportance.includes(el.colType) && el.id != metaId
+    );
+    if (notTargetCols.length <= 0) {
+      throw new Error(
+        "There are no column to calculate importance. Should have at least one 'number' or 'boolean' column except target column."
+      );
     }
 
     const ls = child_process.spawn("node", [
       "./scripts/importance.js",
       JSON.stringify({
         dataId: data.id,
-        metaId: metaId
+        metaId: metaId,
       }),
     ]);
 

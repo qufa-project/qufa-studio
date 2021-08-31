@@ -1,14 +1,55 @@
 <div class="col s12 center-align">
   <ul class="pagination">
-      <li><a href="#"><i class="material-icons">keyboard_double_arrow_left</i></a></li>
-      <li><a href="#"><i class="material-icons">chevron_left</i></a></li>
-      <li class="disabled"><a href="#!"><i class="material-icons">keyboard_double_arrow_left</i></a></li>
-      <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
-      <li class="waves-effect"><a href="#"></a></li>
-      <li class="active"><a href="#!"></a></li>
-      <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
-      <li class="waves-effect"><a href="#"><i class="material-icons">keyboard_double_arrow_right</i></a></li>
-      <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
-      <li class="disabled"><a href="#!"><i class="material-icons">keyboard_double_arrow_right</i></a></li>
+      {{#ifCond currentPage ">" 1}}
+      <li>
+        <a href="#" class="page-num" data-page="1"><i class="material-icons">keyboard_double_arrow_left</i></a>
+      </li>
+      <li>
+        <a href="#" class="page-num" data-page="{{math currentPage "-" 1}}">
+          <i class="material-icons">chevron_left</i>
+        </a>
+      </li>
+      {{else}}
+      <li class="disabled">
+        <a href="#!"><i class="material-icons">keyboard_double_arrow_left</i></a>
+      </li>
+      <li class="disabled">
+        <a href="#!"><i class="material-icons">chevron_left</i></a>
+      </li>
+      {{/ifCond}}
+
+      {{#each pages}}
+      {{#ifCond @this "<=" ../total}}
+        {{#ifCond @this "!=" ../currentPage}}
+          <li class="waves-effect">
+            <a href="#" class="page-num" data-page={{@this}}>{{@this}}</a>
+          </li>
+        {{else}}
+          <li class="active">
+            <a href="#!">{{@this}}</a>
+          </li>
+        {{/ifCond}}
+      {{/ifCond}}
+      {{/each}}
+
+      {{#ifCond currentPage "<" total}}
+      <li class="waves-effect">
+        <a href="#" class="page-num" data-page="{{math currentPage "+" 1}}">
+          <i class="material-icons">chevron_right</i>
+        </a>
+      </li>
+      <li class="waves-effect">
+        <a href="#" class="page-num" data-page="{{total}}">
+          <i class="material-icons">keyboard_double_arrow_right</i>
+        </a>
+      </li>
+      {{else}}
+      <li class="disabled">
+        <a href="#!"><i class="material-icons">chevron_right</i></a>
+      </li>
+      <li class="disabled">
+        <a href="#!"><i class="material-icons">keyboard_double_arrow_right</i></a>
+      </li>
+      {{/ifCond}}
   </ul>
 </div>

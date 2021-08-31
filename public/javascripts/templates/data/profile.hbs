@@ -24,6 +24,7 @@
 
     <tbody>
       {{#each this}}
+      {{#ifCond @index ">" 0}}
       <tr>
         <td>{{columnName}}</td>
         <td class="right-align">{{rowCnt}}</td>
@@ -44,6 +45,7 @@
         <td class="right-align">{{trueCnt}}</td>
         <td class="right-align">{{falseCnt}}</td>
       </tr>
+      {{/ifCond}}
       {{/each}}
     </tbody>
   </table>

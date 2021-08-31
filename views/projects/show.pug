@@ -1,6 +1,7 @@
 extends ../layout
 
 block content
+  include _filter
   .row
     .col.s12
       ul.tabs
@@ -11,9 +12,9 @@ block content
         li.tab
           a(href='#tab-profile' data-tab='profile') Profile
         li.tab
-          a(href='#test3') 특징추출
+          a(href='#test3' data-tab='feature') 특징추출
         li.tab
-          a(href='#test3') 중요도 분석
+          a(href='#test3' data-tab='importance') 중요도 분석
         li.tab
           a(href='#test4') 결측치 보완
         li.tab
@@ -24,8 +25,11 @@ block content
       table.preview-table
         thead
           tr
-            each meta in data.metas
-              th.min
+            each meta, index in data.metas
+              th.min.col-header(data-col=meta.name)
+                a.filter-btn(href='#' data-col=meta.name data-idx=index)
+                  span.material-icons sort
+  
                 | #{meta.name}
                 br
                 small
@@ -35,6 +39,7 @@ block content
               th.num-chart-wrap
                 .num-chart(id="profile-" + meta.name)
         tbody#rows
+      #rows-pagination
     #tab-profile.col.s12
       #profile-wrap
 
@@ -48,6 +53,7 @@ block scripts
     var metaTemplate;
     var rowsTemplate;
     var profileTemplate;
+    var pageTemplate;
 
     am4core.addLicense("CH204832145");
 
@@ -61,25 +67,110 @@ block scripts
         $.get("/javascripts/templates/data/rows.hbs", function(t2) {
           rowsTemplate = Handlebars.compile(t2);
 
-          $.get("/javascripts/templates/data/profile.hbs", function(t3) {
-            profileTemplate = Handlebars.compile(t3);
-            findMetaWithData();
+          $.get("/javascripts/templates/fragments/pagination.hbs", function(p) {
+            pageTemplate = Handlebars.compile(p);
+
+            $.get("/javascripts/templates/data/profile.hbs", function(t3) {
+              profileTemplate = Handlebars.compile(t3);
+              findMetaWithData();
+            });
           });
         });
       });
 
-      function findMetaWithData(options) {
-        $.getJSON("/datas/" + #{data.id}, function(d) {
+      var hasMoreData = true;
+      var searchOption = {
+        currentPage: 1,
+        perPage: 50,
+      }
+      var totalRows = 0;
+
+      function findMetaWithData() {
+        if (!$(".loading").hasClass("active")) {
+          $(".loading").addClass("active")
+        }
+
+        $(".data-filter-box").hide();
+
+        $.getJSON("/datas/" + #{data.id}, searchOption, function(d) {
           var metaHtml = metaTemplate(d.data.metas);
           $("#meta-wrap").html(metaHtml);
 
-          var rowsHtml = rowsTemplate(d.rows[0]);
+          var rowsHtml = rowsTemplate(d.results.rows);
           $("#rows").html(rowsHtml);
+
+          totalRows = d.results.count.cnt;
+
+          var pageInfo = {
+            currentPage: searchOption.currentPage,
+            total: Math.ceil(totalRows / searchOption.perPage),
+            pages: []
+          }
+
+          for(var i = pageInfo.currentPage-3; i <= pageInfo.currentPage + 3; ++i) {
+            if (i > 0) {
+              pageInfo.pages.push(i);
+            }
+          }
+          
+          var paginationHtml = pageTemplate(pageInfo);
+          $("#rows-pagination").html(paginationHtml);
 
           $(".loading").removeClass("active");
         });
       }
 
+      var tempSortCol;
+      var tempSortDir;
+
+      $(document).on("click", ".filter-btn", function(e) {
+        e.preventDefault();
+        var selectedCol = $(this).data('col');
+        var targetCol = ".col-header[data-col='" + selectedCol + "']";
+
+        tempSortCol = selectedCol;
+
+        $(".data-filter-box").detach().appendTo(targetCol);
+        $(".data-filter-box").show();
+      });
+
+      $(document).on("click", ".sort-btn", function(e) {
+        $(".sort-btn").removeClass("active");
+        $(this).addClass("active");
+
+        tempSortDir = $(this).data("direction");
+      });
+
+      $(document).on("click", ".apply-filter-btn", function(e) {
+        if (tempSortCol && tempSortDir) {
+          searchOption.sortCol = tempSortCol;
+          searchOption.sortDir = tempSortDir;
+
+          searchOption.currentPage = 1;
+          findMetaWithData();
+        }
+      });
+
+      $(document).on("click", ".cancel-filter-btn", function(e) {
+        tempSortCol = null;
+        tempSortDir = null;
+
+        delete searchOption.sortCol;
+        delete searchOption.sortDir;
+      });
+
+      $(document).on("click", ".page-num", function(e) {
+        e.preventDefault();
+        var page = $(this).data("page");
+        searchOption.currentPage = page;
+        findMetaWithData();
+      });
+
+      
+
+      $(document).on("click", ".cancel-filter-btn", function(e) {
+        $(".data-filter-box").hide();
+      });
 
       var profileResult;
 
@@ -103,7 +194,6 @@ block scripts
       });
 
       function renderProfileChart(results) {
-        console.log(results);
         for (var i = 1; i < results.length; i++) {
           var result = results[i];
           var profileColId = "profile-" + result.columnName;
@@ -188,15 +278,15 @@ block scripts
           var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
           categoryAxis.autoGridCount = true;
           categoryAxis.dataFields.category = "columnGroupVal";
-          categoryAxis.renderer.grid.template.location = 0;
           categoryAxis.renderer.minGridDistance = 80;
           
           // category axis label 길이 제한
           var label = categoryAxis.renderer.labels.template;
           label.fill = am4core.color("#fff");
+          label.dx = 0;
           label.fontWeight = "200";
           label.truncate = true;
-          label.maxWidth = 110;
+          label.maxWidth = 80;
           label.fontSize = 10;
           
 
