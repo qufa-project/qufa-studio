@@ -90,6 +90,7 @@ async function run() {
     const dataTypesForImportance = ["number", "boolean"]
 
     const targetAvailableMetas = data.metas.filter(el => dataTypesForImportance.includes(el.colType))
+    const targetUnAvailableMetas = data.metas.filter(el => !dataTypesForImportance.includes(el.colType))
 
     const inputs = data.metas.map(el => {
       const obj = {
@@ -141,6 +142,16 @@ async function run() {
           targetId: targetMeta.id,
           featureId: input.id,
           importance: input.importance
+        })
+      }
+    }
+
+    for(let unableMeta of targetUnAvailableMetas) {
+      for(let input of inputs) {
+        rowsForBulkInsert.push({
+          targetId: unableMeta.id,
+          featureId: input.id,
+          importance: 0
         })
       }
     }
