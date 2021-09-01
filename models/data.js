@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.hasMany(models.Meta, { as: "metas", foreignKey: "data_id" });
+      this.hasMany(models.MkFeature, { as: "features", foreignKey: "data_id" });
     }
   }
   Data.init(

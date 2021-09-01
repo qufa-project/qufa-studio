@@ -12,7 +12,7 @@ block content
         li.tab
           a(href='#tab-profile' data-tab='profile') Profile
         li.tab
-          a(href='#tab-empty' data-tab='feature') 특징추출
+          a(href='#tab-feature' data-tab='feature') 특징추출
         li.tab
           a(href='#tab-empty' data-tab='importance') 중요도 분석
         li.tab
@@ -42,6 +42,8 @@ block content
       #rows-pagination
     #tab-profile.col.s12
       #profile-wrap
+    #tab-feature.col.s12
+      #feature-wrap
     #tab-empty
 
 block scripts
@@ -55,6 +57,7 @@ block scripts
     var rowsTemplate;
     var profileTemplate;
     var pageTemplate;
+    var featureTemplate;
 
     am4core.addLicense("CH204832145");
 
@@ -63,21 +66,34 @@ block scripts
 
       $('.tabs').tabs();
 
-      $.get("/javascripts/templates/data/meta.hbs", function(t1) {
-        metaTemplate = Handlebars.compile(t1);
-        $.get("/javascripts/templates/data/rows.hbs", function(t2) {
-          rowsTemplate = Handlebars.compile(t2);
-
-          $.get("/javascripts/templates/fragments/pagination.hbs", function(p) {
-            pageTemplate = Handlebars.compile(p);
-
-            $.get("/javascripts/templates/data/profile.hbs", function(t3) {
-              profileTemplate = Handlebars.compile(t3);
-              findMetaWithData();
-            });
-          });
+      var t1 = function() {
+        return $.get("/javascripts/templates/data/meta.hbs", function(t) {
+          metaTemplate = Handlebars.compile(t);
         });
-      });
+      }
+      var t2 = function() {
+        return $.get("/javascripts/templates/data/rows.hbs", function(t) {
+          rowsTemplate = Handlebars.compile(t);
+        });
+      }
+      var t3 = function() {
+        return $.get("/javascripts/templates/fragments/pagination.hbs", function(t) {
+          pageTemplate = Handlebars.compile(t);
+        });
+      }
+      var t4 = function() {
+        return $.get("/javascripts/templates/data/profile.hbs", function(t) {
+          profileTemplate = Handlebars.compile(t);
+        });
+      }
+      var t5 = function() {
+        return $.get("/javascripts/templates/data/features.hbs", function(t) {
+          featureTemplate = Handlebars.compile(t);
+        });
+      }
+
+      $.when(t1(), t2(), t3(), t4(), t5())
+        .then(findMetaWithData());
 
       var hasMoreData = true;
       var searchOption = {
@@ -166,7 +182,6 @@ block scripts
         searchOption.currentPage = page;
         findMetaWithData();
       });
-
       
 
       $(document).on("click", ".cancel-filter-btn", function(e) {
@@ -174,13 +189,13 @@ block scripts
       });
 
       var profileResult;
+      var featureResult;
 
       $('ul.tabs').on('click', 'a', function(e) {
         var selectedTab = $(this).data('tab');
         if (selectedTab) {
           if (!profileResult) {
             $.getJSON("/datas/" + #{data.id} + "/profile", function(d) {
-              console.log(d);
               if (d && d.status == "success") {
                 profileResult = d.results;
 
@@ -188,6 +203,15 @@ block scripts
                 $("#profile-wrap").html(profileHtml);
 
                 renderProfileChart(profileResult);
+              }
+            });
+          }
+
+          if (!featureResult) {
+            $.getJSON("/datas/" + #{data.id} + "/features", function(features) {
+              if (features && features.length) {
+                var featureHtml = featureTemplate(features);
+                $("#feature-wrap").html(featureHtml);
               }
             });
           }

@@ -1,0 +1,19 @@
+<div class="table-responsive">
+  <table class="preview-table">
+    <thead>
+      <tr>
+        <th class="center-align">특징명</th>
+        <th class="center-align">타입</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each @this}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{colType}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

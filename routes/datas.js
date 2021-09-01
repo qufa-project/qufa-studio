@@ -61,6 +61,12 @@ router.get("/:id/profile", async function (req, res, next) {
   }
 });
 
+router.get("/:id/features", async function (req, res, next) {
+  const data = await DataManager.findWithFeatures(req.params.id);
+
+  res.json(data.features);
+});
+
 /**
  * @openapi
  * /datas:
