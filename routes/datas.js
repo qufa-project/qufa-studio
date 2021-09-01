@@ -44,7 +44,16 @@ router.get("/:id/profile", async function (req, res, next) {
     const response = await axios.get(
       `${profileConfig.baseUrl}/profile/${data.dataTable}`
     );
-    console.log(response);
+
+    if (
+      !data.hasProfile &&
+      response &&
+      response.data &&
+      response.data.status == "success"
+    ) {
+      data.hasProfile = true;
+      await data.save();
+    }
 
     res.json(response.data);
   } catch (err) {
@@ -72,7 +81,6 @@ router.get("/:id/profile", async function (req, res, next) {
  */
 router.post("/", upload.single("file"), async function (req, res, next) {
   try {
-    console.log(req.file);
     const reqBody = req.body;
     const parseOption = JSON.parse(reqBody.parseOption);
     const meta = JSON.parse(reqBody.meta);
@@ -80,10 +88,7 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     const fileName = `${new Date().getTime()}_${req.file.originalname}`;
     const data = await DataManager.create(fileName, req.file);
     const metaList = await MetaManager.createAll(data, meta);
-    console.log(data);
-    console.log(data.id);
     const s3Res = await FileManager.uploadFile(data.id, fileName, req.file);
-    console.log(s3Res);
     data.remotePath = `${s3Res}`;
     await data.save();
 
