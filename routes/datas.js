@@ -92,6 +92,11 @@ router.get("/:id/outlier", async function (req, res, next) {
   }
 });
 
+router.get("/:id/importance", async function (req, res, next) {
+  const data = await DataManager.findWithImportance(req.params.id);
+  res.json(data);
+});
+
 /**
  * @openapi
  * /datas:

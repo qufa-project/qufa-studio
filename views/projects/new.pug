@@ -183,13 +183,8 @@ block scripts
             isIndex: $(row).find(".is-index").is(":checked")
           });
         });
-        console.log(meta);
         formData.append('meta', JSON.stringify(meta));
         
-        for (var pair of formData.entries()) {
-          console.log(pair[0]+ ', ' + pair[1]); 
-        }
-
         $(".loading").addClass("active");
   
         $.ajax({
@@ -200,7 +195,7 @@ block scripts
           processData: false,
           success: function(d) {
             $(".loading").removeClass("active");
-            location.href = "/projects/" + d.id;
+            window.location.href = "/projects/" + d.id;
           }, error: function(err) {
             $(".loading").removeClass("active");
             console.error(err);
