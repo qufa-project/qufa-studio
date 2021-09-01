@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       status: DataTypes.STRING,
       hasProfile: DataTypes.BOOLEAN,
       mkfeatProgress: DataTypes.INTEGER,
+      importanceProgress: DataTypes.INTEGER,
     },
     {
       sequelize,
