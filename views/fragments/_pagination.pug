@@ -17,7 +17,7 @@ mixin pagination(p)
             i.material-icons chevron_left
       - for(var i = p.currentPage-3; i <= p.currentPage + 3; ++i)
         - if (i <= p.total && i > 0)
-          - if (i !== p.currentPage)
+          - if (i !== parseInt(p.currentPage))
             li.waves-effect
               a(href=util.urlHelper(p, i!=1 ? i: null))=i
           - else

@@ -10,6 +10,10 @@ const config = {
   profiler: {
     baseUrl: "http://localhost:8080",
   },
+  imputation: {
+    baseUrl: "http://localhost:5000",
+    token: "",
+  },
 };
 
 module.exports = config;

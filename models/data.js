@@ -12,6 +12,30 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Meta, { as: "metas", foreignKey: "data_id" });
       this.hasMany(models.MkFeature, { as: "features", foreignKey: "data_id" });
     }
+
+    getImputationResultPath() {
+      if (this.remotePath) {
+        const pureFileName = this.remotePath
+          .replace(/^.*[\\\/]/, "")
+          .replace(/\.[^/.]+$/, "");
+
+        return `imputation/impute/${this.id}/${pureFileName}/result.json`;
+      }
+
+      return null;
+    }
+
+    getOutlierResultPath() {
+      if (this.remotePath) {
+        const pureFileName = this.remotePath
+          .replace(/^.*[\\\/]/, "")
+          .replace(/\.[^/.]+$/, "");
+
+        return `imputation/outlier/${this.id}/${pureFileName}/result.json`;
+      }
+
+      return null;
+    }
   }
   Data.init(
     {
@@ -33,5 +57,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
+
   return Data;
 };

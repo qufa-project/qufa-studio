@@ -63,8 +63,33 @@ router.get("/:id/profile", async function (req, res, next) {
 
 router.get("/:id/features", async function (req, res, next) {
   const data = await DataManager.findWithFeatures(req.params.id);
-
   res.json(data.features);
+});
+
+router.get("/:id/imputation", async function (req, res, next) {
+  const data = await DataManager.find(req.params.id);
+
+  try {
+    const s3Obj = await FileManager.findS3Objct(data.getImputationResultPath());
+    console.log(data.getImputationResultPath());
+    console.log(s3Obj);
+    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.get("/:id/outlier", async function (req, res, next) {
+  const data = await DataManager.find(req.params.id);
+
+  try {
+    const s3Obj = await FileManager.findS3Objct(data.getOutlierResultPath());
+    console.log(s3Obj.Body.toString("utf-8"));
+    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+  } catch (err) {
+    console.log(err);
+    res.json(null);
+  }
 });
 
 /**

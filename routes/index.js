@@ -24,9 +24,12 @@ router.get("/", async function (req, res, next) {
 
   const data = await DataManager.findAll(pageOption);
 
+  pageOption.currentPage = parseInt(pageOption.currentPage);
   pageOption.total = Math.ceil(data.count / pageOption.perPage);
   pageOption.path = req.path;
   pageOption.query = req.query;
+
+  console.log(pageOption);
 
   res.render("index", {
     title: "QUFA 통합관리시스템",

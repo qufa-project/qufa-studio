@@ -2,6 +2,7 @@ var FileManager = require("../lib/FileManager");
 var MetaManager = require("../lib/MetaManager");
 var DataManager = require("../lib/DataManager");
 var RawDataManager = require("../lib/RawDataManager");
+var ImputationManager = require("../lib/ImputationManager");
 
 const { Data, Meta, MkFeature, Importance } = require("../models");
 const config = require("../configs/config");
@@ -40,40 +41,48 @@ async function run() {
 
     await RawDataManager.enqueueProfile(data);
 
+    //Imputation
+    console.log("Call imputation / outlier");
+    await ImputationManager.runImputation(data.remotePath);
+    await ImputationManager.runOutlier(data.remotePath);
+
     // mkfeat
-    console.log("MK feat start!")
-    const mkfeatUrl = config.mkfeat.url
-    const mkfeatManager = new MkfeatManager({endpoint: mkfeatUrl})
+    console.log("MK feat start!");
+    const mkfeatUrl = config.mkfeat.url;
+    const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
     const extractData = {
       data: {
         uri: `s3://qufa-test/${data.remotePath}`,
-        columns: data.metas.map(el => {
+        columns: data.metas.map((el) => {
           return {
             name: el.name,
-            type: el.colType
-          }
-        })
+            type: el.colType,
+          };
+        }),
       },
-      operator: []
-    }
+      operator: [],
+    };
 
-    const mkExtractCallBack = async(progress) => {
-      console.log(`Mkfeat progress: ${progress}`)
+    const mkExtractCallBack = async (progress) => {
+      console.log(`Mkfeat progress: ${progress}`);
       data.mkfeatProgress = progress;
-      await data.save()
-    }
-    
-    const mkFeatures = await mkfeatManager.batchExtractJob(extractData, mkExtractCallBack)
+      await data.save();
+    };
 
-    const featuresForBulkInsert = mkFeatures.map(el => {
+    const mkFeatures = await mkfeatManager.batchExtractJob(
+      extractData,
+      mkExtractCallBack
+    );
+
+    const featuresForBulkInsert = mkFeatures.map((el) => {
       return {
         dataId: data.id,
         name: el.name,
-        colType: el.type
-      }
-    })
+        colType: el.type,
+      };
+    });
 
-    await MkFeature.bulkCreate(featuresForBulkInsert)
+    await MkFeature.bulkCreate(featuresForBulkInsert);
 
     // importance nxn matrix를 생성한다.
     console.log("Mk importance start!");
