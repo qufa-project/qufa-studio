@@ -316,7 +316,7 @@ block scripts
       function markOutlierData() {
         if (outlierResult && outlierResult.outlier_indices) {
           for (var dataId of outlierResult.outlier_indices) {
-            $(".data-row[data-id='" + dataId + "']").addClass("outlier");
+            $(".data-row[data-id='" + (dataId + 1) + "']").addClass("outlier");
           }
         }
       }
