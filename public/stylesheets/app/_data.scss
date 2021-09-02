@@ -60,6 +60,12 @@ table.preview-table {
   thead,
   tbody {
     tr {
+      &.data-row {
+        &.outlier {
+          background: #e64a19;
+        }
+      }
+
       .min {
         white-space: nowrap;
       }

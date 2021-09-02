@@ -112,39 +112,49 @@ block scripts
       }
       var totalRows = 0;
 
-      function findMetaWithData() {
+      var dataRows;
+      function findMetaWithData(isForced) {
         if (!$(".loading").hasClass("active")) {
           $(".loading").addClass("active")
         }
 
         $(".data-filter-box").hide();
 
-        $.getJSON("/datas/" + #{data.id}, searchOption, function(d) {
-          var metaHtml = metaTemplate(d.data.metas);
-          $("#meta-wrap").html(metaHtml);
+        if (!dataRows || isForced) {
+          $.getJSON("/datas/" + #{data.id}, searchOption, function(d) {
+            var metaHtml = metaTemplate(d.data.metas);
+            $("#meta-wrap").html(metaHtml);
 
-          var rowsHtml = rowsTemplate(d.results.rows);
-          $("#rows").html(rowsHtml);
+            if (d.results && d.results.rows && d.results.rows.length) {
+              dataRows = d.results.rows;
+              var rowsHtml = rowsTemplate(d.results.rows);
+              $("#rows").html(rowsHtml);
 
-          totalRows = d.results.count.cnt;
-
-          var pageInfo = {
-            currentPage: searchOption.currentPage,
-            total: Math.ceil(totalRows / searchOption.perPage),
-            pages: []
-          }
-
-          for(var i = pageInfo.currentPage-3; i <= pageInfo.currentPage + 3; ++i) {
-            if (i > 0) {
-              pageInfo.pages.push(i);
+              markOutlierData();
             }
-          }
-          
-          var paginationHtml = pageTemplate(pageInfo);
-          $("#rows-pagination").html(paginationHtml);
 
+            totalRows = d.results.count.cnt;
+
+            var pageInfo = {
+              currentPage: searchOption.currentPage,
+              total: Math.ceil(totalRows / searchOption.perPage),
+              pages: []
+            }
+
+            for(var i = pageInfo.currentPage-3; i <= pageInfo.currentPage + 3; ++i) {
+              if (i > 0) {
+                pageInfo.pages.push(i);
+              }
+            }
+            
+            var paginationHtml = pageTemplate(pageInfo);
+            $("#rows-pagination").html(paginationHtml);
+
+            $(".loading").removeClass("active");
+          });
+        } else {
           $(".loading").removeClass("active");
-        });
+        }
       }
 
       var tempSortCol;
@@ -174,7 +184,7 @@ block scripts
           searchOption.sortDir = tempSortDir;
 
           searchOption.currentPage = 1;
-          findMetaWithData();
+          findMetaWithData(true);
         }
       });
 
@@ -190,7 +200,7 @@ block scripts
         e.preventDefault();
         var page = $(this).data("page");
         searchOption.currentPage = page;
-        findMetaWithData();
+        findMetaWithData(true);
       });
       
 
@@ -207,6 +217,8 @@ block scripts
       $('ul.tabs').on('click', 'a', function(e) {
         var selectedTab = $(this).data('tab');
         if (selectedTab) {
+          findMetaWithData();
+
           if (!profileResult) {
             $.getJSON("/datas/" + #{data.id} + "/profile", function(d) {
               if (d && d.status == "success") {
@@ -267,8 +279,9 @@ block scripts
 
           if (!imputationResult) {
             $.getJSON("/datas/" + #{data.id} + "/imputation", function(result) {
+              console.log("Imputation Result =======");
               console.log(result);
-              if (result.result) {
+              if (result && result.result) {
                 imputationResult = result.result
 
                 var resultData = [];
@@ -289,14 +302,24 @@ block scripts
 
           if (!outlierResult) {
             $.getJSON("/datas/" + #{data.id} + "/outlier", function(result) {
-              console.log(result);
-              if (result.result) {
-                outlierResult = result.result
+              if (result && result.result) {
+                console.log("outlierResult");
+                console.log(result.result);
+                outlierResult = result.result;
+                markOutlierData();
               }
             });
           }
         }
       });
+
+      function markOutlierData() {
+        if (outlierResult && outlierResult.outlier_indices) {
+          for (var dataId of outlierResult.outlier_indices) {
+            $(".data-row[data-id='" + dataId + "']").addClass("outlier");
+          }
+        }
+      }
 
       function renderProfileChart(results) {
         for (var i = 1; i < results.length; i++) {
