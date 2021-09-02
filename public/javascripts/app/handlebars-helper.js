@@ -52,3 +52,7 @@ Handlebars.registerHelper("fixFloat", function (distance, f) {
 
   return distance;
 });
+
+Handlebars.registerHelper("findByIndex", function (list, idx) {
+  return list[idx];
+});

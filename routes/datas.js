@@ -72,10 +72,10 @@ router.get("/:id/imputation", async function (req, res, next) {
   try {
     const s3Obj = await FileManager.findS3Objct(data.getImputationResultPath());
     console.log(data.getImputationResultPath());
-    console.log(s3Obj);
     res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
   } catch (err) {
     console.log(err);
+    res.json(null);
   }
 });
 
@@ -84,7 +84,6 @@ router.get("/:id/outlier", async function (req, res, next) {
 
   try {
     const s3Obj = await FileManager.findS3Objct(data.getOutlierResultPath());
-    console.log(s3Obj.Body.toString("utf-8"));
     res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
   } catch (err) {
     console.log(err);

@@ -1,9 +1,11 @@
 {{#each @this}}
-<tr>
+<tr class="data-row" data-id="{{findByIndex @this 0}}">
   {{#each @this}}
+  {{#ifCond @index ">" 0}}
   <td>
     {{@this}}
   </td>
+  {{/ifCond}}
   {{/each}}
 </tr>
 {{/each}}
