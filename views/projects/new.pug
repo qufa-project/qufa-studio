@@ -198,6 +198,7 @@ block scripts
             window.location.href = "/projects/" + d.id;
           }, error: function(err) {
             $(".loading").removeClass("active");
+            alert("데이터를 등록 할 수 없습니다.")
             console.error(err);
           }
         })

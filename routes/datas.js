@@ -148,11 +148,9 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     ls.on("exit", function (code) {
       console.log("exit: " + code);
     });
-
     res.json({ id: data.id });
   } catch (err) {
-    console.log(err);
-    res.json({ err: err });
+    return next(err)
   }
 });
 
