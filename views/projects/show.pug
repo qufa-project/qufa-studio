@@ -16,9 +16,7 @@ block content
         li.tab
           a(href='#tab-importance' data-tab='importance') 중요도 분석
         li.tab
-          a(href='#tab-imputation' data-tab='imputation') 결측치 보완
-        li.tab
-          a(href='#tab-outlier' data-tab='outlier') 이상치 제거
+          a(href='#tab-imputation' data-tab='imputation') 결측치
     #tab-meta.col.s12
       #meta-wrap
     #tab-preview.col.s12.table-responsive
@@ -51,9 +49,6 @@ block content
         include ../fragments/spinner/_mesh_spinner
     #tab-imputation.col.s12
       #imputation-wrap.tab-wrap
-        include ../fragments/spinner/_mesh_spinner
-    #tab-outlier.col.s12
-      #outlier-wrap.tab-wrap
         include ../fragments/spinner/_mesh_spinner
 
 block scripts
@@ -468,6 +463,7 @@ block scripts
 
           xAxis.renderer.grid.template.disabled = true;
           xAxis.renderer.minGridDistance = 40;
+          xAxis.renderer.labels.template.rotation = 30;
 
           yAxis.renderer.grid.template.disabled = true;
           yAxis.renderer.inversed = true;
