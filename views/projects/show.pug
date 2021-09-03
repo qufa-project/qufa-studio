@@ -1,594 +1,168 @@
 extends ../layout
 
 block content
-  include _filter
   .row
     .col.s12
-      ul.tabs
-        li.tab
-          a.active(href='#tab-meta') 메타데이터
-        li.tab
-          a(href='#tab-preview' data-tab='preview') 데이터 미리보기
-        li.tab
-          a(href='#tab-profile' data-tab='profile') Profile
-        li.tab
-          a(href='#tab-feature' data-tab='feature') 특징추출
-        li.tab
-          a(href='#tab-importance' data-tab='importance') 중요도 분석
-        li.tab
-          a(href='#tab-imputation' data-tab='imputation') 결측치
-    #tab-meta.col.s12
-      #meta-wrap
-    #tab-preview.col.s12.table-responsive
-      table.preview-table
-        thead
-          tr
-            each meta, index in data.metas
-              th.min.col-header(data-col=meta.name)
-                a.filter-btn(href='#' data-col=meta.name data-idx=index)
-                  span.material-icons sort
-  
-                | #{meta.name}
-                br
-                small
-                  | #{meta.colType}
-          tr
-            each meta in data.metas
-              th.num-chart-wrap
-                .num-chart(id="profile-" + meta.name)
-        tbody#rows
-      #rows-pagination
-    #tab-profile.col.s12
-      #profile-wrap.tab-wrap
-        include ../fragments/spinner/_mesh_spinner
-    #tab-feature.col.s12
-      #feature-wrap.tab-wrap
-        include ../fragments/spinner/_mesh_spinner
-    #tab-importance.col.s12
-      #importance-wrap.tab-wrap
-        include ../fragments/spinner/_mesh_spinner
-    #tab-imputation.col.s12
-      #imputation-wrap.tab-wrap
-        include ../fragments/spinner/_mesh_spinner
+      h4.title=project.title
+      p=project.description
+
+  if !project.datasets.length
+    include _file_form
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
   script(src='/javascripts/app/handlebars-helper.js')
-  script(src='https://cdn.amcharts.com/lib/4/core.js')
-  script(src='https://cdn.amcharts.com/lib/4/charts.js')
-  script(src='https://cdn.amcharts.com/lib/4/themes/animated.js')
+  script(src='/javascripts/app/file-uploader.js')
+  script(src='/javascripts/ext/papa-parser/papaparse.min.js')
+  script(src='/javascripts/ext/momentjs/moment-with-locales.min.js')
   script.
-    var metaTemplate;
-    var rowsTemplate;
-    var profileTemplate;
-    var pageTemplate;
-    var featureTemplate;
+    $(function(){
+      $("select").formSelect();
 
-    am4core.addLicense("CH204832145");
-
-    $(document).ready(function(){
-      $(".loading").addClass("active");
-
-      $('.tabs').tabs();
-
-      var t1 = function() {
-        return $.get("/javascripts/templates/data/meta.hbs", function(t) {
-          metaTemplate = Handlebars.compile(t);
+      if ($("#file-upload-form").length) {
+        var metaFormTemplate;
+        var colTypeOrders = ["string", "number", "date", "boolean"];
+        $.get("/javascripts/templates/data/metaForm.hbs", function(t) {
+          metaFormTemplate = Handlebars.compile(t);
         });
-      }
-      var t2 = function() {
-        return $.get("/javascripts/templates/data/rows.hbs", function(t) {
-          rowsTemplate = Handlebars.compile(t);
-        });
-      }
-      var t3 = function() {
-        return $.get("/javascripts/templates/fragments/pagination.hbs", function(t) {
-          pageTemplate = Handlebars.compile(t);
-        });
-      }
-      var t4 = function() {
-        return $.get("/javascripts/templates/data/profile.hbs", function(t) {
-          profileTemplate = Handlebars.compile(t);
-        });
-      }
-      var t5 = function() {
-        return $.get("/javascripts/templates/data/features.hbs", function(t) {
-          featureTemplate = Handlebars.compile(t);
-        });
-      }
 
-      $.when(t1(), t2(), t3(), t4(), t5())
-        .done(findMetaWithData());
+        var fileUploader = new FileUploader();
 
-      var hasMoreData = true;
-      var searchOption = {
-        currentPage: 1,
-        perPage: 50,
-      }
-      var totalRows = 0;
+        $("#extract-btn").click(function(e) {
+          var f = fileUploader.getFiles()[0];
+          var csvConfig = {
+            delimiter: $("#delimiter").val(),
+            header: $("#has-header").is(":checked"),
+            encoding: $("#encoding").val(),
+            preview: 10,
+            complete: function(results, file) {
+              renderMetaForm(results);
+            }
+          }
 
-      var dataRows;
-      function findMetaWithData(isForced) {
-        if (!$(".loading").hasClass("active")) {
-          $(".loading").addClass("active")
+          Papa.parse(f, csvConfig);
+        });
+
+        function findType(value) {
+          if (!Number.isNaN(value) && !Number.isNaN(Number(value))) {
+            return "number";
+          }
+
+          if (moment(value).isValid()) {
+            return "date";
+          }
+
+          return "string";
         }
 
-        $(".data-filter-box").hide();
+        function fixColType(before, after) {
+          if (!before) {
+            return after;
+          }
+          
+          if (!after) {
+            return before;
+          }
 
-        if (!dataRows || isForced) {
-          $.getJSON("/datas/" + #{data.id}, searchOption, function(d) {
-            var metaHtml = metaTemplate(d.data.metas);
-            $("#meta-wrap").html(metaHtml);
+          if (colTypeOrders.indexOf(before) < colTypeOrders.indexOf(after)) {
+            return before;
+          }
 
-            if (d.results && d.results.rows && d.results.rows.length) {
-              dataRows = d.results.rows;
-              var rowsHtml = rowsTemplate(d.results.rows);
-              $("#rows").html(rowsHtml);
+          return after
+        }
 
-              markOutlierData();
+        function renderMetaForm(csvResults) {
+          var lang = $("#header-lang").val();
+          var headers = csvResults.meta.fields;
+          if (!headers) {
+            headers = new Array(Object.keys(csvResults.data[0]).length);
+          }
+
+          var cols = [];
+          for (var header of headers) {
+            var colObj = {
+              maxLen: 0,
+              name: header,
+            };
+
+            if (lang == "ko") {
+              colObj.koName = header;
+            } else {
+              colObj.enName = header;
             }
 
-            totalRows = d.results.count.cnt;
+            cols.push(colObj);
+          }
 
-            var pageInfo = {
-              currentPage: searchOption.currentPage,
-              total: Math.ceil(totalRows / searchOption.perPage),
-              pages: []
-            }
-
-            for(var i = pageInfo.currentPage-3; i <= pageInfo.currentPage + 3; ++i) {
-              if (i > 0) {
-                pageInfo.pages.push(i);
+          for (var rowItem of csvResults.data) {
+            for (var col of cols) {
+              var value = rowItem[col.name];
+              col.type = findType(value);
+              if (col.type == "number") {
+                col.maxLen = Math.max(10, ("" + value).length + 5);  
+              } else if (col.type == "string") {
+                col.maxLen = Math.max(50, ("" + value).length + 25);
+              } else {
+                col.maxLen = Math.max(col.maxLen, ("" + value).length);
               }
             }
-            
-            var paginationHtml = pageTemplate(pageInfo);
-            $("#rows-pagination").html(paginationHtml);
+          }
 
-            $(".loading").removeClass("active");
+          var metaFormHtml = metaFormTemplate(cols);
+          
+          $(".csv-cols-wrap").html(metaFormHtml);
+          $(".meta-form-select").formSelect({
+            classes: "meta-form-select"
           });
-        } else {
-          $(".loading").removeClass("active");
+          $('.tooltipped').tooltip();
         }
-      }
+        
+        $(document).on("click", "#save-meta-btn", function() {
+          var formData = new FormData();
+          formData.append('file', fileUploader.getFiles()[0]);
 
-      var tempSortCol;
-      var tempSortDir;
+          var parseOption = {
+            delimiter: $("#delimiter").val(),
+            header: $("#has-header").is(":checked"),
+            encoding: $("#encoding").val()
+          };
+          formData.append('parseOption', JSON.stringify(parseOption));
 
-      $(document).on("click", ".filter-btn", function(e) {
-        e.preventDefault();
-        var selectedCol = $(this).data('col');
-        var targetCol = ".col-header[data-col='" + selectedCol + "']";
-
-        tempSortCol = selectedCol;
-
-        $(".data-filter-box").detach().appendTo(targetCol);
-        $(".data-filter-box").show();
-      });
-
-      $(document).on("click", ".sort-btn", function(e) {
-        $(".sort-btn").removeClass("active");
-        $(this).addClass("active");
-
-        tempSortDir = $(this).data("direction");
-      });
-
-      $(document).on("click", ".apply-filter-btn", function(e) {
-        if (tempSortCol && tempSortDir) {
-          searchOption.sortCol = tempSortCol;
-          searchOption.sortDir = tempSortDir;
-
-          searchOption.currentPage = 1;
-          findMetaWithData(true);
-        }
-      });
-
-      $(document).on("click", ".cancel-filter-btn", function(e) {
-        tempSortCol = null;
-        tempSortDir = null;
-
-        delete searchOption.sortCol;
-        delete searchOption.sortDir;
-      });
-
-      $(document).on("click", ".page-num", function(e) {
-        e.preventDefault();
-        var page = $(this).data("page");
-        searchOption.currentPage = page;
-        findMetaWithData(true);
-      });
-      
-
-      $(document).on("click", ".cancel-filter-btn", function(e) {
-        $(".data-filter-box").hide();
-      });
-
-      var profileResult;
-      var featureResult;
-      var importanceResult;
-      var imputationResult;
-      var outlierResult;
-
-      $('ul.tabs').on('click', 'a', function(e) {
-        var selectedTab = $(this).data('tab');
-        if (selectedTab) {
-          findMetaWithData();
-
-          if (!profileResult) {
-            $.getJSON("/datas/" + #{data.id} + "/profile", function(d) {
-              if (d && d.status == "success") {
-                profileResult = d.results;
-
-                var profileHtml = profileTemplate(profileResult);
-                $("#profile-wrap").html(profileHtml);
-
-                renderProfileChart(profileResult);
-              }
+          var meta = [];
+          $(".meta-form-row").each(function(idx, row) {
+            meta.push({
+              name: $(row).find(".name").val() || "col" + (idx + 1),
+              koName: $(row).find(".ko-name").val(),
+              dataType: $(row).find(".data-type").val(),
+              maxLength: $(row).find(".max-length").val(),
+              floatLength: $(row).find(".float-length").val(),
+              dateFormat: $(row).find(".date-format").val(),
+              trueValue: $(row).find(".true-value").val(),
+              isNotNull: $(row).find(".is-not-null").is(":checked"),
+              isUnique: $(row).find(".is-unique").is(":checked"),
+              isIndex: $(row).find(".is-index").is(":checked")
             });
-          }
-
-          if (!featureResult) {
-            $.getJSON("/datas/" + #{data.id} + "/features", function(features) {
-              if (features && features.length) {
-                var featureHtml = featureTemplate(features);
-                $("#feature-wrap").html(featureHtml);
-              }
-            });
-          }
-
-          if (!importanceResult) {
-            $.getJSON("/datas/" + #{data.id} + "/importance", function(result) {
-              console.log("Importance ==============================");
-              console.log(result);
-              if (result && result.metas) {
-                importanceResult = result.metas;
-                
-                var metaMap = {};
-                var chartData = [];
-                for (var r of importanceResult) {
-                  metaMap[r.id] = {name: r.name, koName: r.koName}
-                  chartData.push({
-                    base: r.name,
-                    target: r.name,
-                    value: 0
-                  });
-                }
-                
-                for (var r of importanceResult) {
-                  if (r.targets && r.targets.length){
-                    for(var target of r.targets) {
-                      chartData.push({
-                        base: metaMap[r.id].name,
-                        target: metaMap[target.featureId].name,
-                        value: Math.ceil(target.importance * 100)
-                      });
-                    }
-                  }
-                }
-
-                $("#importance-wrap").html("");
-                renderImportanceChart("importance-wrap", chartData);
-              }
-            });
-          }
-
-          if (!imputationResult) {
-            $.getJSON("/datas/" + #{data.id} + "/imputation", function(result) {
-              console.log("Imputation Result =======");
-              console.log(result);
-              if (result && result.result) {
-                imputationResult = result.result
-
-                var resultData = [];
-                for(var key of Object.keys(imputationResult)) {
-                  var obj = {
-                    category: key.trim(),
-                    //value: imputationResult[key]
-                    value: Math.floor(Math.random() * 100)
-                  };
-                  resultData.push(obj);
-                }
-
-                $("#imputation-wrap").html("");
-                renderImputationChart("imputation-wrap", resultData);
-              }
-            });
-          }
-
-          if (!outlierResult) {
-            $.getJSON("/datas/" + #{data.id} + "/outlier", function(result) {
-              if (result && result.result) {
-                console.log("outlierResult");
-                console.log(result.result);
-                outlierResult = result.result;
-                markOutlierData();
-              }
-            });
-          }
-        }
-      });
-
-      function markOutlierData() {
-        if (outlierResult && outlierResult.outlier_indices) {
-          for (var dataId of outlierResult.outlier_indices) {
-            $(".data-row[data-id='" + (dataId + 1) + "']").addClass("outlier");
-          }
-        }
-      }
-
-      function renderProfileChart(results) {
-        for (var i = 1; i < results.length; i++) {
-          var result = results[i];
-          var profileColId = "profile-" + result.columnName;
-
-          if (result.rowCnt == result.uniqueCnt) {
-            var uniqueHtml = [];
-            uniqueHtml.push("<div class='profile-value'>");
-            uniqueHtml.push("<h4 class='center-align'>" + result.uniqueCnt + "</h4>");
-            uniqueHtml.push("<div class='center-align'><small>Unique values</small></div>");
-            uniqueHtml.push("</div>");
-
-            $("#" + profileColId).html(uniqueHtml.join(""));
-          } else if (result.vfs && result.vfs.length) {
-            renderBarChart(profileColId, result.vfs);
-          } else if (result.columnType == "DECIMAL") {
-            var numberHtml = [];
-            numberHtml.push("<div class='profile-value'>");
-            numberHtml.push(" <div>");
-            numberHtml.push(" <span>Max: </span>");
-            numberHtml.push(" <span class='value'>");
-            numberHtml.push(result.numMaxVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
-            numberHtml.push(" </span>");
-            numberHtml.push(" </div>");
-
-            numberHtml.push(" <div>");
-            numberHtml.push(" <span>Min: </span>");
-            numberHtml.push(" <span class='value'>");
-            numberHtml.push(result.numMinVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
-            numberHtml.push(" </span>");
-            numberHtml.push(" </div>");
-
-            numberHtml.push(" <div>");
-            numberHtml.push(" <span>Mean</span>");
-            numberHtml.push(" <span class='value'>");
-            numberHtml.push(result.numMeanVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
-            numberHtml.push(" </span>");
-            numberHtml.push(" </div>");
-
-            numberHtml.push(" <div>");
-            numberHtml.push(" <span>Median</span>");
-            numberHtml.push(" <span class='value'>");
-            numberHtml.push(result.numMedianVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
-            numberHtml.push(" </span>");
-            numberHtml.push(" </div>");
-            numberHtml.push("</div>");
-
-            $("#" + profileColId).html(numberHtml.join(""));
-          } else {
-            var stringHtml = [];
-            stringHtml.push("<div class='profile-value'>");
-            stringHtml.push(" <div>");
-            stringHtml.push(" <span>Distinct: </span>");
-            stringHtml.push(" <span class='value'>");
-            stringHtml.push(result.distinctCnt.toLocaleString());
-            stringHtml.push(" </span>");
-            stringHtml.push(" </div>");
-
-            stringHtml.push(" <div>");
-            stringHtml.push(" <span>Duplicate: </span>");
-            stringHtml.push(" <span class='value'>");
-            stringHtml.push(result.duplicateCnt.toLocaleString());
-            stringHtml.push(" </span>");
-            stringHtml.push(" </div>");
-            numberHtml.push("</div>");
-
-            $("#" + profileColId).html(stringHtml.join(""));
-          }
-        }
-      }
-
-      function renderBarChart(chartId, items) {
-        am4core.ready(function() {
-          am4core.useTheme(am4themes_animated);
-          // Themes end
-          // Create chart instance
-
-          var chart = am4core.create(chartId, am4charts.XYChart);
-          chart.data = items;
-          
-          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-          categoryAxis.autoGridCount = true;
-          categoryAxis.dataFields.category = "columnGroupVal";
-          categoryAxis.renderer.minGridDistance = 80;
-          
-          // category axis label 길이 제한
-          var label = categoryAxis.renderer.labels.template;
-          label.fill = am4core.color("#fff");
-          label.dx = 0;
-          label.fontWeight = "200";
-          label.truncate = true;
-          label.maxWidth = 80;
-          label.fontSize = 10;
-          
-
-          //- categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
-          //-   if (target.dataItem && target.dataItem.index & 2 == 2) {
-          //-     return dy + 25;
-          //-   }
-          //-   return dy;
-          //- });
-
-          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-          valueAxis.renderer.line.disabled = true; //disables axis line
-          valueAxis.renderer.labels.template.disabled = true; //disables labels
-          valueAxis.renderer.grid.template.disabled = true;  //disables grid
-
-          
-          // Create series
-          var series = chart.series.push(new am4charts.ColumnSeries());
-          series.dataFields.valueY = "columnGroupCount";
-          series.dataFields.categoryX = "columnGroupVal";
-          series.name = "Count";
-          series.columns.template.fillOpacity = .8;
-          series.columns.template.fill = am4core.color("#48dac5");
-          series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
-          
-          series.tooltip.getFillFromObject = false;
-          series.tooltip.background.fill = am4core.color("#fff");
-          series.tooltip.fontWeight = "200";
-          series.tooltip.label.fill = am4core.color("#000");
-          series.tooltip.label.fontSize = 10;
-
-          var columnTemplate = series.columns.template;
-          columnTemplate.strokeWidth = 1;
-          columnTemplate.strokeOpacity = 0.3;
-        });
-      }
-
-      function renderImportanceChart(chartId, data) {
-        am4core.ready(function() {
-          // Themes begin
-          am4core.useTheme(am4themes_animated);
-          // Themes end
-
-          var chart = am4core.create(chartId, am4charts.XYChart);
-          chart.maskBullets = false;
-          chart.data = data;
-
-          var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-          var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-
-          xAxis.dataFields.category = "base";
-          yAxis.dataFields.category = "target";
-
-          xAxis.renderer.grid.template.disabled = true;
-          xAxis.renderer.minGridDistance = 40;
-          xAxis.renderer.labels.template.rotation = 30;
-
-          yAxis.renderer.grid.template.disabled = true;
-          yAxis.renderer.inversed = true;
-          yAxis.renderer.minGridDistance = 30;
-
-          xAxis.renderer.labels.template.fill = am4core.color("#fff");
-
-          yAxis.renderer.labels.template.fill = am4core.color("#fff");
-
-          var series = chart.series.push(new am4charts.ColumnSeries());
-          series.dataFields.categoryX = "base";
-          series.dataFields.categoryY = "target";
-          series.dataFields.value = "value";
-          series.sequencedInterpolation = true;
-          series.defaultState.transitionDuration = 3000;
-
-          var bgColor = new am4core.InterfaceColorSet().getFor("background");
-
-          var columnTemplate = series.columns.template;
-          columnTemplate.strokeWidth = 1;
-          columnTemplate.strokeOpacity = 0.2;
-          columnTemplate.stroke = bgColor;
-          columnTemplate.tooltipText = "{base}, {target}: {value.workingValue.formatNumber('#.')}%";
-          columnTemplate.width = am4core.percent(100);
-          columnTemplate.height = am4core.percent(100);
-
-          series.heatRules.push({
-            target: columnTemplate,
-            property: "fill",
-            min: am4core.color("#fff"),
-            max: am4core.color("#4db6ac")
           });
-
-          // heat legend
-          var heatLegend = chart.bottomAxesContainer.createChild(am4charts.HeatLegend);
-          heatLegend.width = am4core.percent(100);
-          heatLegend.series = series;
-          heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
-          heatLegend.valueAxis.renderer.minGridDistance = 30;
-
-          // heat legend behavior
-          series.columns.template.events.on("over", function(event) {
-            handleHover(event.target);
-          })
-
-          series.columns.template.events.on("hit", function(event) {
-            handleHover(event.target);
-          })
-
-          function handleHover(column) {
-            if (!isNaN(column.dataItem.value)) {
-              heatLegend.valueAxis.showTooltipAt(column.dataItem.value)
+          formData.append('meta', JSON.stringify(meta));
+          
+          $(".loading").addClass("active");
+    
+          $.ajax({
+            url: '/datasets',
+            data: formData,
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            success: function(d) {
+              $(".loading").removeClass("active");
+              window.location.href = "/projects/" + d.id;
+            }, error: function(err) {
+              $(".loading").removeClass("active");
+              alert("데이터를 등록 할 수 없습니다.")
+              console.error(err);
             }
-            else {
-              heatLegend.valueAxis.hideTooltip();
-            }
-          }
-
-          series.columns.template.events.on("out", function(event) {
-            heatLegend.valueAxis.hideTooltip();
           })
-
-        });
-      }
-
-      function renderImputationChart(chartId, data) {
-        am4core.ready(function() {
-          am4core.useTheme(am4themes_animated);
-
-          var chart = am4core.create(chartId, am4charts.XYChart);
-          chart.padding(40, 40, 40, 40);
-          chart.data = data;
-
-          var colorList = [
-            am4core.color("#48DAC5"),
-            am4core.color("#00A389"),
-            am4core.color("#0F5F52"),
-            am4core.color("#13463D"),
-            am4core.color("#384948"),
-            am4core.color("#38514D"),
-            am4core.color("#536B67"),
-            am4core.color("#8B9997")
-          ];
-
-          var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-          categoryAxis.renderer.grid.template.location = 0;
-          categoryAxis.dataFields.category = "category";
-          categoryAxis.renderer.minGridDistance = 1;
-          categoryAxis.renderer.inversed = true;
-          categoryAxis.renderer.grid.template.stroke = "#fff";
-          categoryAxis.renderer.grid.template.strokeDasharray = "2,4";
-
-          var label = categoryAxis.renderer.labels.template;
-          label.fill = am4core.color("#fff");
-
-          var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
-          valueAxis.min = 0;
-          valueAxis.renderer.grid.template.stroke = "#fff";
-          valueAxis.renderer.grid.template.strokeDasharray = "2,4";
-
-          var vLabel = valueAxis.renderer.labels.template;
-          vLabel.fill = am4core.color("#fff");
-
-          var series = chart.series.push(new am4charts.ColumnSeries());
-          series.dataFields.categoryY = "category";
-          series.dataFields.valueX = "value";
-          series.tooltipText = "{valueX.value}"
-          series.columns.template.strokeOpacity = 0;
-          series.columns.template.column.cornerRadiusBottomRight = 5;
-          series.columns.template.column.cornerRadiusTopRight = 5;
-
-          var labelBullet = series.bullets.push(new am4charts.LabelBullet())
-          labelBullet.label.horizontalCenter = "left";
-          labelBullet.label.dx = 10;
-          labelBullet.label.text = "{values.valueX.workingValue.formatNumber('#')} 건";
-          labelBullet.locationX = 1;
-          labelBullet.fill = am4core.color("#fff");
-
-          // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
-          series.columns.template.adapter.add("fill", function(fill, target){
-            //return chart.colors.getIndex(target.dataItem.index);
-            return colorList[target.dataItem.index % colorList.length];
-          });
-
-          categoryAxis.sortBySeries = series;
         });
       }
     });
+    

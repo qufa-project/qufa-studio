@@ -1,0 +1,51 @@
+extends ../layout
+
+block content
+  .row
+    .col.s12.mb-2
+      .table-responsive
+        table
+          thead
+            tr
+              th ID
+              th 프로젝트명
+          tbody
+            each project in projects.rows
+              tr
+                td=project.id
+                td
+                  a(href=`/projects/${project.id}`)=project.title
+
+
+    .col.s12.right-align
+      a.waves-effect.waves-light.btn.modal-trigger(href='#new-project-modal')
+        i.material-icons.left add
+        | 신규 프로젝트 생성
+
+
+  #new-project-modal.modal.modal-fixed-footer
+    .modal-content
+      h4 프로젝트 생성
+      form#project-form.col.s12(action="/projects" method="post")
+        .row
+          .input-field.col.s12
+            input#title(type='text' name="title")
+            label(for='title') 프로젝트 명칭
+        .row
+          .input-field.col.s12
+            textarea#description.materialize-textarea(data-length='2000')
+            label(for='description') 프로젝트 설명
+        
+    .modal-footer
+      a.modal-close.waves-effect.waves-green.btn-flat(href='#!') 취소
+      a#submit-btn.waves-effect.waves-green.btn-flat(href='#!') 생성하기
+
+block scripts
+  script.
+    $(function() {
+      $('.modal').modal();
+
+      $("#submit-btn").click(function(e) {
+        $("#project-form")[0].submit();
+      })
+    });

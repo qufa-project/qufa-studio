@@ -1,0 +1,12 @@
+$dark-grey: #25262c;
+
+.modal-content {
+  background-color: $dark-grey;
+
+  .input-field {
+    > input,
+    > textarea {
+      color: #fff;
+    }
+  }
+}

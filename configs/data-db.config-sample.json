@@ -1,0 +1,23 @@
+{
+  "development": {
+    "user": "root",
+    "password": null,
+    "database": "qufa-data-dev",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "user": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "user": "root",
+    "password": null,
+    "database": "qufa-data-prod",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

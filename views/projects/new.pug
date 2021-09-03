@@ -113,9 +113,9 @@ block scripts
         $('.tooltipped').tooltip();
       }
 
-      var targetFiels;
+      var targetFiles;
       $("#extract-btn").click(function(e) {
-        var f = targetFiels[0];
+        var f = targetFiles[0];
         var csvConfig = {
           delimiter: $("#delimiter").val(),
           header: $("#has-header").is(":checked"),
@@ -159,7 +159,7 @@ block scripts
 
       $(document).on("click", "#save-meta-btn", function() {
         var formData = new FormData();
-        formData.append('file', targetFiels[0]);
+        formData.append('file', targetFiles[0]);
 
         var parseOption = {
           delimiter: $("#delimiter").val(),
@@ -220,7 +220,7 @@ block scripts
           droppedFiles = false,
           showFiles	 = function( files ) {
             label.textContent = files.length > 1 ? ( input.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', files.length ) : files[ 0 ].name;
-            targetFiels = files;
+            targetFiles = files;
           }, triggerFormSubmit = function() {
             var event = document.createEvent( 'HTMLEvents' );
             event.initEvent( 'submit', true, false );
@@ -361,4 +361,4 @@ block scripts
         input.addEventListener( 'focus', function(){ input.classList.add( 'has-focus' ); });
         input.addEventListener( 'blur', function(){ input.classList.remove( 'has-focus' ); });
       });
-    })          
+    })
