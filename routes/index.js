@@ -40,4 +40,12 @@ router.get("/", async function (req, res, next) {
   });
 });
 
+router.get("/login", function(req, res, next) {
+  res.render("users/login")
+})
+
+router.post("/login", function(req, res, next) {
+  res.redirect("/")
+})
+
 module.exports = router;
