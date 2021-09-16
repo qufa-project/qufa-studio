@@ -33,7 +33,8 @@ router.post("/", async function(req, res, next) {
   const {username, password, confirm_password} = req.body;
 
   if(password !== confirm_password) {
-    res.status(400).send("password not matched")
+    req.flash('danger', '비밀번호가 일치하지 않습니다.')
+    res.redirect('/users/new')
   }
 
   const user = await userService.create({

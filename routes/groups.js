@@ -3,30 +3,6 @@ const group = require("../models/group");
 const GroupService = require("../services/GroupsService");
 var router = express.Router();
 
-var groups = [
-  {
-    id: 1,
-    name: "qufa",
-    description: "Qufa 전체 기능을 담당하는 그룹",
-    updatedAt: "20210101",
-    createdAt: "20210101"
-  },
-  {
-    id: 1,
-    name: "qufa",
-    description: "Qufa 전체 기능을 담당하는 그룹",
-    updatedAt: "20210101",
-    createdAt: "20210101"
-  },
-  {
-    id: 1,
-    name: "qufa",
-    description: "Qufa 전체 기능을 담당하는 그룹",
-    updatedAt: "20210101",
-    createdAt: "20210101"
-  }
-]
-
 const groupService = new GroupService();
 
 router.get("/", async function(req, res, next) {

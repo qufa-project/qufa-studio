@@ -8,7 +8,8 @@ const swaggerUi = require("swagger-ui-express");
 const session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-const passportConfig = require('./utils/passport'); // 여기
+const passportConfig = require('./utils/passport');
+const flash = require('connect-flash');
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -52,6 +53,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -65,6 +67,12 @@ app.use(function(req, res, next) {
   console.log(req.user)
   next()
 })
+
+//flash middleware
+app.use(function(req, res, next){
+  res.locals.message = req.flash();
+  next();
+});
 
 //web
 app.use("/", indexRouter);

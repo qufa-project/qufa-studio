@@ -12,8 +12,9 @@ html
     include ../fragments/_top_nav.pug 
 
     div.login-form
-
       h1 로그인
+      if message
+        | !{message.error}
       form(action="/login" method="post")
         div.input-field
           input#username.validate(type="text" name="username")

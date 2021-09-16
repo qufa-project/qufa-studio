@@ -18,12 +18,12 @@ module.exports = () => {
     usernameField: 'username',
     passwordField: 'password',
     session: true,
-    passReqToCallback: false,
-  }, async (username, password, done) => {
+    passReqToCallback: true,
+  }, async (req, username, password, done) => {
     try {
       const user = await userService.findByUsername(username);
       if(!user) {
-        return done(new Error("사용자를 찾을 수 없습니다."), false)
+        return done(null, false, req.flash('error', '사용자를 찾을 수 없습니다.'))
       }
 
       const isPasswordMatched = userService.validateUserPassword(user, password)
@@ -31,7 +31,7 @@ module.exports = () => {
       if(isPasswordMatched) {
         return done(null, user);
       } else {
-        return done(new Error("비밀번호가 틀렸습니다."), false);
+        return done(null, false, req.flash('error', '비밀번호가 일치하지 않습니다.'))
       }
     } catch(err) {
       return done(err)
