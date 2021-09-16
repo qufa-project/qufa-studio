@@ -1,4 +1,5 @@
 var express = require("express");
+const group = require("../models/group");
 const GroupService = require("../services/GroupsService");
 var router = express.Router();
 
@@ -54,6 +55,16 @@ router.post("/", async function(req, res, next) {
   await groupService.create(newGroup);
 
   res.redirect("/groups")
+})
+
+router.get("/:id", async function(req, res, next) {
+  const {id} = req.params
+
+  const group = await groupService.findById(id)
+  
+  res.render("groups/show", {
+    group: group
+  })
 })
 
 module.exports = router

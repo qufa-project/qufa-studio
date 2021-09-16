@@ -21,18 +21,26 @@ class GroupService {
       const offset = (options.currentPage - 1) * options.perPage;
 
       try {
-        const projects = await Group.findAndCountAll({
+        const groups = await Group.findAndCountAll({
           offset: offset,
           limit: options.perPage,
           order: [["id", "DESC"]],
         });
 
-        resolve(projects.rows);
+        resolve(groups.rows);
       } catch (err) {
         reject(err);
       }
     });
   };
+
+  async findById(id) {
+    const group = await Group.findOne({
+      where: { id: id },
+    });
+
+    return group;
+  }
 }
 
 module.exports = GroupService;

@@ -5,6 +5,10 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const session = require('express-session');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+const passportConfig = require('./utils/passport'); // 여기
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -30,6 +34,15 @@ var app = express();
 app.locals.moment = require("moment");
 app.locals.util = require("./utils");
 
+app.use(
+  session({
+    name: "mysession",
+    secret: "qwer1234",
+    resave: true,
+    saveUninitialized: true
+  })
+)
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
@@ -39,6 +52,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(passport.initialize());
+app.use(passport.session());
+passportConfig();
+
+// locals currentUser middleware
+app.use(function(req, res, next) {
+  if(req.user) {
+    res.locals.currentUser = req.user
+  }
+  console.log(req.user)
+  next()
+})
 
 //web
 app.use("/", indexRouter);

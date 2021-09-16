@@ -5,10 +5,12 @@
         i.material-icons menu
       a.brand-logo(href='/')
         img(src='/images/logo.png')
-      if user
+      if currentUser
         ul#nav-mobile.right.hide-on-med-and-down
           li
             a(href='/') 프로젝트 관리
+          li
+            a(href='/logout') 로그아웃
           li
             a(href='#')
               i.material-icons account_circle

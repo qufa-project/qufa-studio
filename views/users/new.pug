@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+  .row
+    .col.s12
+      h1 신규 사용자 등록
+        form(action="/users" method="post")
+          div.input-field
+            input#group.validate(type="text" name="group" value="Qufa" disabled)
+            label(for="group") Group
+
+          div.input-field
+            input#username.validate(type="text" name="username")
+            label(for="username") Username
+
+          div.input-field
+            input#password.validate(type="password" name="password")
+            label(for="password") Password
+
+          div.input-field
+            input#confirm-password.validate(type="password" name="confirm_password")
+            label(for="confirm-password") Confirm Password
+
+          .right-align
+            button.btn(type="submit") 사용자 등록

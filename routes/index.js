@@ -1,4 +1,5 @@
 var express = require("express");
+const passport = require("passport");
 var router = express.Router();
 
 const DataManager = require("../lib/DataManager");
@@ -44,8 +45,14 @@ router.get("/login", function(req, res, next) {
   res.render("users/login")
 })
 
-router.post("/login", function(req, res, next) {
-  res.redirect("/")
+router.post("/login", passport.authenticate('local', {
+  failureRedirect: '/login',
+  successRedirect: '/'
+}))
+
+router.get("/logout", function(req, res, next) {
+  req.session.destroy()
+  res.redirect("/login")
 })
 
 module.exports = router;

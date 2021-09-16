@@ -16,7 +16,8 @@ block content
             each group in groups
               tr
                 td=group.id
-                td=group.name
+                td
+                  a(href=`/groups/${group.id}`)=group.name
                 td=group.description 
                 td=moment(group.updatedAt).format("yyyy/MM/DD HH:mm")
                 td=moment(group.createdAt).format("yyyy/MM/DD HH:mm")
