@@ -10,6 +10,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var datasRouter = require("./routes/datas");
 var projectsRouter = require("./routes/projects");
+var groupRouter = require("./routes/groups");
 
 // swagger initialize
 const options = {
@@ -48,6 +49,9 @@ app.use("/datas", datasRouter);
 
 //projects
 app.use("/projects", projectsRouter);
+
+//groups
+app.use("/groups", groupRouter);
 
 //docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification));

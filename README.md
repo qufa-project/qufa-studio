@@ -24,3 +24,12 @@
 # run migration (config 관리를 위해 별도 관리)
 > npx sequelize-cli db:migrate --config=./configs/db.config.json
 ```
+
+### Seed
+```sh
+# seed 생성
+> npx sequelize seed:generate --name defaultGroup
+
+# run
+> npx sequelize-cli db:seed:all --config=./configs/db.config.json
+```
