@@ -1,0 +1,8 @@
+.flash-message
+  if message
+    if message.error
+      .flash-error
+        |!{message.error}
+    if message.success
+      .flash-success 
+        |!{message.success}

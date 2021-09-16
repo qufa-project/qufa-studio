@@ -6,7 +6,7 @@ block content
       h1 신규 사용자 등록
         form(action="/users" method="post")
           div.input-field
-            input#group.validate(type="text" name="group" value="Qufa" disabled)
+            input#group.validate(type="text" name="group" value=currentUser.group.name disabled)
             label(for="group") Group
 
           div.input-field

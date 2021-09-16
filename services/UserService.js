@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { User } = require("../models");
+const { User, Group } = require("../models");
 
 const DATA_DEFAULT_PER_PAGE = 10;
 const saltRounds = 10;
@@ -28,6 +28,12 @@ class UserService {
           offset: offset,
           limit: options.perPage,
           order: [["id", "DESC"]],
+          include: [
+            {
+              model: Group,
+              as: "group",
+            },
+          ],
         });
 
         resolve(users.rows);
@@ -48,6 +54,12 @@ class UserService {
   async findByUsername(username) {
     const user = await User.findOne({
       where: { username: username },
+      include: [
+        {
+          model: Group,
+          as: "group",
+        },
+      ],
     });
 
     return user;
