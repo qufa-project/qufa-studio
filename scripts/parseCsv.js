@@ -34,9 +34,17 @@ async function run() {
     }
 
     const rows = await MetaManager.parseRecord(dataset, option);
-    await RawDataManager.insertData(dataset, rows);
-    dataset.status = DatasetManager.DATA_STATUS.done.stat;
-    await dataset.save();
+    try {
+      await RawDataManager.insertData(dataset, rows);
+      dataset.status = Dataset.status.done.stat;
+      await dataset.save();
+    } catch (error) {
+      console.log("Exception in insertData =======================");
+      dataset.status = Dataset.status.error.stat;
+      await dataset.save();
+
+      process.exit(0);
+    }
 
     await RawDataManager.enqueueProfile(dataset);
 
