@@ -1,6 +1,6 @@
 ul#slide-out.sidenav.sidenav-fixed
   li
-    a.active(href='#!')
+    a.active(href='/projects')
       i.material-icons folder_shared
       | 프로젝트 관리
   li
@@ -16,7 +16,7 @@ ul#slide-out.sidenav.sidenav-fixed
   li
     a.subheader Subheader
   
-  if currentUser.role == 0
+  if currentUser && currentUser.role == 0
     if currentUser.group.id == 1
       li
         a(href='/groups') 

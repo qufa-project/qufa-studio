@@ -2,7 +2,7 @@
   "development": {
     "user": "root",
     "password": null,
-    "database": "qufa-data-dev",
+    "database": "qufa_data_dev",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
@@ -16,7 +16,7 @@
   "production": {
     "user": "root",
     "password": null,
-    "database": "qufa-data-prod",
+    "database": "qufa_data_prod",
     "host": "127.0.0.1",
     "dialect": "mysql"
   }

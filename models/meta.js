@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.Data, { foreignKey: "data_id" });
+      this.belongsTo(models.Dataset, { foreignKey: "dataset_id" });
 
       this.hasMany(models.Importance, {
         as: "targets",
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Meta.init(
     {
-      dataId: DataTypes.INTEGER,
+      datasetId: DataTypes.INTEGER,
       name: DataTypes.STRING,
       koName: DataTypes.STRING,
       colType: DataTypes.STRING,

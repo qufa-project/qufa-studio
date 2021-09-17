@@ -2,7 +2,7 @@
   "development": {
     "user": "iskim",
     "password": "rladlstjd",
-    "database": "qufa-data",
+    "database": "qufa_data",
     "host": "127.0.0.1",
     "port": 3307,
     "dialect": "mysql"

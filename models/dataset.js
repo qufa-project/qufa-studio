@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
         as: "project",
         foreignKey: "project_id",
       });
+
+      this.hasMany(models.Meta, { as: "metas", foreignKey: "dataset_id" });
     }
   }
   Dataset.init(
