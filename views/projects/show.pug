@@ -17,6 +17,8 @@ block scripts
   script(src='/javascripts/ext/momentjs/moment-with-locales.min.js')
   script.
     $(function(){
+      var projectId = "#{project.id}";
+
       $("select").formSelect();
 
       if ($("#file-upload-form").length) {
@@ -119,6 +121,7 @@ block scripts
         
         $(document).on("click", "#save-meta-btn", function() {
           var formData = new FormData();
+          formData.append("projectId", projectId);
           formData.append('file', fileUploader.getFiles()[0]);
 
           var parseOption = {

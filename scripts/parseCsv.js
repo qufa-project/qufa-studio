@@ -1,10 +1,9 @@
-var FileManager = require("../lib/FileManager");
 var MetaManager = require("../lib/MetaManager");
-var DataManager = require("../lib/DataManager");
+var DatasetManager = require("../lib/DatasetManager");
 var RawDataManager = require("../lib/RawDataManager");
 var ImputationManager = require("../lib/ImputationManager");
 
-const { Data, Meta, MkFeature, Importance } = require("../models");
+const { Dataset, Meta, MkFeature, Importance } = require("../models");
 const config = require("../configs/config");
 const MkfeatManager = require("../lib/MkfeatManager");
 
@@ -16,8 +15,8 @@ run();
 
 async function run() {
   try {
-    const data = await Data.findOne({
-      where: { id: option.dataId },
+    const dataset = await Dataset.findOne({
+      where: { id: option.datasetId },
       include: [
         {
           model: Meta,
@@ -27,24 +26,24 @@ async function run() {
     });
 
     if (!option.encoding) {
-      option.encoding = await MetaManager.detectEncoding(data.remotePath);
+      option.encoding = await MetaManager.detectEncoding(dataset.remotePath);
     }
 
     if (!option.delimiter) {
       option.delimiter = ",";
     }
 
-    const rows = await MetaManager.parseRecord(data, option);
-    const result = await RawDataManager.insertData(data, rows);
-    data.status = DataManager.DATA_STATUS.done.stat;
-    await data.save();
+    const rows = await MetaManager.parseRecord(dataset, option);
+    await RawDataManager.insertData(dataset, rows);
+    dataset.status = DatasetManager.DATA_STATUS.done.stat;
+    await dataset.save();
 
-    await RawDataManager.enqueueProfile(data);
+    await RawDataManager.enqueueProfile(dataset);
 
     //Imputation
     console.log("Call imputation / outlier");
-    await ImputationManager.runImputation(data.remotePath);
-    await ImputationManager.runOutlier(data.remotePath);
+    await ImputationManager.runImputation(dataset.remotePath);
+    await ImputationManager.runOutlier(dataset.remotePath);
 
     // mkfeat
     console.log("MK feat start!");
@@ -52,8 +51,8 @@ async function run() {
     const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
     const extractData = {
       data: {
-        uri: `s3://qufa-test/${data.remotePath}`,
-        columns: data.metas.map((el) => {
+        uri: `s3://qufa-test/${dataset.remotePath}`,
+        columns: dataset.metas.map((el) => {
           return {
             name: el.name,
             type: el.colType,
@@ -65,8 +64,8 @@ async function run() {
 
     const mkExtractCallBack = async (progress) => {
       console.log(`Mkfeat progress: ${progress}`);
-      data.mkfeatProgress = progress;
-      await data.save();
+      dataset.mkfeatProgress = progress;
+      await dataset.save();
     };
 
     const mkFeatures = await mkfeatManager.batchExtractJob(
@@ -76,7 +75,7 @@ async function run() {
 
     const featuresForBulkInsert = mkFeatures.map((el) => {
       return {
-        dataId: data.id,
+        datasetId: dataset.id,
         name: el.name,
         colType: el.type,
       };
@@ -87,76 +86,85 @@ async function run() {
     // importance nxn matrix를 생성한다.
     console.log("Mk importance start!");
 
-    const dataTypesForImportance = ["number", "boolean"]
+    const dataTypesForImportance = ["number", "boolean"];
 
-    const targetAvailableMetas = data.metas.filter(el => dataTypesForImportance.includes(el.colType))
-    const targetUnAvailableMetas = data.metas.filter(el => !dataTypesForImportance.includes(el.colType))
+    const targetAvailableMetas = dataset.metas.filter((el) =>
+      dataTypesForImportance.includes(el.colType)
+    );
+    const targetUnAvailableMetas = dataset.metas.filter(
+      (el) => !dataTypesForImportance.includes(el.colType)
+    );
 
-    const inputs = data.metas.map(el => {
+    const inputs = dataset.metas.map((el) => {
       const obj = {
         id: el.id,
         name: el.name,
-        type: el.colType
-      }
-      return obj
-    })
+        type: el.colType,
+      };
+      return obj;
+    });
 
-    const rowsForBulkInsert = []
+    const rowsForBulkInsert = [];
 
-    for(let i = 0; i < targetAvailableMetas.length; i++) {
-      const targetMeta = targetAvailableMetas[i]
-      for(let j = 0; j < inputs.length; j++) {
-        if(inputs[j].name == targetMeta.name) {
-          inputs[j]["label"] = true
+    for (let i = 0; i < targetAvailableMetas.length; i++) {
+      const targetMeta = targetAvailableMetas[i];
+      for (let j = 0; j < inputs.length; j++) {
+        if (inputs[j].name == targetMeta.name) {
+          inputs[j]["label"] = true;
         } else {
-          delete inputs[j]["label"]
+          delete inputs[j]["label"];
         }
       }
 
-      const mkfeatUrl = config.mkfeat.url
-      const mkfeatManager = new MkfeatManager({endpoint: mkfeatUrl})
+      const mkfeatUrl = config.mkfeat.url;
+      const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
 
-      const uri = `s3://qufa-test/${data.remotePath}`
+      const uri = `s3://qufa-test/${dataset.remotePath}`;
 
       const payload = {
         data: {
           uri: uri,
-          columns: inputs
+          columns: inputs,
+        },
+      };
+
+      const results = await mkfeatManager.batchImportanceJob(
+        payload,
+        async (progress) => {
+          const totalProgress =
+            i * (100 / targetAvailableMetas.length) +
+            progress / targetAvailableMetas.length;
+          console.log(`mk importance progress: ${totalProgress}`);
+          dataset.importanceProgress = totalProgress;
+          await dataset.save();
         }
+      );
+
+      for (let i = 0; i < inputs.length; i++) {
+        inputs[i]["importance"] = results[i];
       }
 
-      const results = await mkfeatManager.batchImportanceJob(payload, async (progress) => {
-        const totalProgress = (i * (100/targetAvailableMetas.length)) + (progress/targetAvailableMetas.length)
-        console.log(`mk importance progress: ${totalProgress}`)
-        data.importanceProgress = totalProgress;
-        await data.save()
-      })
-
-      for(let i = 0; i < inputs.length; i++ ) {
-        inputs[i]["importance"] = results[i]
-      }
-  
       //generate result
-      for(let input of inputs) {
+      for (let input of inputs) {
         rowsForBulkInsert.push({
           targetId: targetMeta.id,
           featureId: input.id,
-          importance: input.importance
-        })
+          importance: input.importance,
+        });
       }
     }
 
-    for(let unableMeta of targetUnAvailableMetas) {
-      for(let input of inputs) {
+    for (let unableMeta of targetUnAvailableMetas) {
+      for (let input of inputs) {
         rowsForBulkInsert.push({
           targetId: unableMeta.id,
           featureId: input.id,
-          importance: 0
-        })
+          importance: 0,
+        });
       }
     }
 
-    await Importance.bulkCreate(rowsForBulkInsert)
+    await Importance.bulkCreate(rowsForBulkInsert);
 
     process.exit(0);
   } catch (err) {

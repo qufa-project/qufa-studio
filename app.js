@@ -5,19 +5,19 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-const passportConfig = require('./utils/passport');
-const flash = require('connect-flash');
-
+var passport = require("passport");
+var LocalStrategy = require("passport-local").Strategy;
+const passportConfig = require("./utils/passport");
+const flash = require("connect-flash");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var datasRouter = require("./routes/datas");
+var datasetsRouter = require("./routes/datasets");
 var projectsRouter = require("./routes/projects");
 var groupRouter = require("./routes/groups");
 
-const initSession = require('./utils/session')
+const initSession = require("./utils/session");
 
 // swagger initialize
 const options = {
@@ -37,7 +37,6 @@ var app = express();
 app.locals.moment = require("moment");
 app.locals.util = require("./utils");
 
-
 initSession(app);
 
 // view engine setup
@@ -56,15 +55,15 @@ app.use(passport.session());
 passportConfig();
 
 // locals currentUser middleware
-app.use(function(req, res, next) {
-  if(req.user) {
-    res.locals.currentUser = req.user
+app.use(function (req, res, next) {
+  if (req.user) {
+    res.locals.currentUser = req.user;
   }
-  next()
-})
+  next();
+});
 
 //flash middleware
-app.use(function(req, res, next){
+app.use(function (req, res, next) {
   res.locals.message = req.flash();
   next();
 });
@@ -78,6 +77,9 @@ app.use("/datas", datasRouter);
 
 //projects
 app.use("/projects", projectsRouter);
+
+//datasets
+app.use("/datasets", datasetsRouter);
 
 //groups
 app.use("/groups", groupRouter);
