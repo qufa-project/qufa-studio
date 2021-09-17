@@ -27,9 +27,10 @@ router.get("/", auth.checkAuth, auth.checkRole(0), async function (req, res, nex
     perPage: req.query.perPage || 10,
     sortCol: req.query.sortCol || "id",
     sortDir: req.query.sortDir || "DESC",
+    groupId: req.user.group.id
   };
 
-  const users = await userService.findAll(options)
+  const users = await userService.findAllByGroup(options)
   res.render("users/index", {
     users: users
   })
@@ -75,7 +76,8 @@ router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, nex
     return res.redirect('/users/new')
   }
 
-  if(currentUser.group.id !== groupId && currentUser.group.id != 1) {
+  if(currentUser.group.id != groupId && currentUser.group.id != 1) {
+    console.log(currentUser.group.id)
     req.flash('error', '해당 그룹의 사용자를 생성 할 권한이 없습니다.')
     return res.redirect('/users/new')
   }

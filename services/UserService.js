@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const { User, Group } = require("../models");
+const { Op } = require("sequelize");
 
 const DATA_DEFAULT_PER_PAGE = 10;
 const saltRounds = 10;
@@ -16,26 +17,36 @@ class UserService {
       }
     });
   };
-
-  findAll = (options) => {
+  
+  findAllByGroup = (options) => {
     return new Promise(async (resolve, reject) => {
       options.perPage = options.perPage || DATA_DEFAULT_PER_PAGE;
 
       const offset = (options.currentPage - 1) * options.perPage;
+      const groupId = options.groupId
+      
+      const findOption = {
+        offset: offset,
+        limit: options.perPage,
+        order: [["id", "DESC"]],
+        include: [
+          {
+            model: Group,
+            as: "group",
+          },
+        ]
+      }
+
+      if(groupId >= 2) {
+        findOption['where'] = {
+          group_id: {
+            [Op.eq]: options.groupId
+          }
+        }
+      }
 
       try {
-        const users = await User.findAndCountAll({
-          offset: offset,
-          limit: options.perPage,
-          order: [["id", "DESC"]],
-          include: [
-            {
-              model: Group,
-              as: "group",
-            },
-          ],
-        });
-
+        const users = await User.findAndCountAll(findOption);
         resolve(users.rows);
       } catch (err) {
         reject(err);
