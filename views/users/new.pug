@@ -5,21 +5,34 @@ block content
     .col.s12
       h1 신규 사용자 등록
         form(action="/users" method="post")
-          div.input-field
+          .input-field
             input#group.validate(type="text" name="group" value=currentUser.group.name disabled)
             label(for="group") Group
 
-          div.input-field
+          .input-field
             input#username.validate(type="text" name="username")
             label(for="username") Username
 
-          div.input-field
+          .input-field
             input#password.validate(type="password" name="password")
             label(for="password") Password
 
-          div.input-field
+          .input-field
             input#confirm-password.validate(type="password" name="confirm_password")
             label(for="confirm-password") Confirm Password
 
+          .input-field
+            select(name='role')
+              option(value='' disabled='' selected='') 권한 선택
+              option(value='0') 관리자
+              option(value='1') 일반사용자
+
           .right-align
             button.btn(type="submit") 사용자 등록
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      var elems = document.querySelectorAll('select');
+      var instances = M.FormSelect.init(elems);
+    });

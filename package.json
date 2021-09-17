@@ -21,6 +21,7 @@
     "db-migrate-mysql": "^2.1.2",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "express-mysql-session": "^2.1.7",
     "express-session": "^1.17.2",
     "http-errors": "~1.6.3",
     "iconv-lite": "^0.6.3",

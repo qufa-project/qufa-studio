@@ -15,13 +15,14 @@ ul#slide-out.sidenav.sidenav-fixed
     .divider
   li
     a.subheader Subheader
-  li
-    a(href='/groups') 
-      i.material-icons group
-      | 그룹관리
-  li
-    a(href='/users') 
-      i.material-icons group
-      | 사용자관리
-  li
-    a.waves-effect(href='#!') ...
+  
+  if currentUser.role == 0
+    if currentUser.group.id == 1
+      li
+        a(href='/groups') 
+          i.material-icons group
+          | 그룹관리
+    li
+      a(href='/users') 
+        i.material-icons group
+        | 사용자관리

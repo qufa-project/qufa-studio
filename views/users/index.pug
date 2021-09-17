@@ -1,5 +1,14 @@
 extends ../layout
 
+mixin roleString(role)
+  case role
+    when 0
+      | 관리자
+    when 1
+      | 일반 사용자
+    default
+      | ??
+  
 block content
   .row
     .col.s12.mb-2
@@ -7,20 +16,23 @@ block content
         table
           thead
             tr
-              th ID
-              th username
-              th group
-              th 수정일
-              th 생성일
+              th.center ID
+              th.center username
+              th.center group
+              th.center 권한
+              th.center 수정일
+              th.center 생성일
           tbody
             each user in users
               tr
-                td=user.id
-                td
+                td.center=user.id
+                td.center
                   a(href=`/users/${user.id}`)=user.username
-                td=user.group.name
-                td=moment(user.updatedAt).format("yyyy/MM/DD HH:mm")
-                td=moment(user.createdAt).format("yyyy/MM/DD HH:mm")
+                td.center=user.group.name
+                td.center 
+                  +roleString(user.role)
+                td.center=moment(user.updatedAt).format("yyyy/MM/DD HH:mm")
+                td.center=moment(user.createdAt).format("yyyy/MM/DD HH:mm")
 
     .col.s12.right-align
         a.waves-effect.waves-light.btn.modal-trigger(href='/users/new')

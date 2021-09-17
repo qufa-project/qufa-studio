@@ -19,7 +19,7 @@ var users = [
 const userService = new UserService();
 
 /* GET users listing. */
-router.get("/", auth.checkAuth, async function (req, res, next) {
+router.get("/", auth.checkAuth, auth.checkRole(0), async function (req, res, next) {
   const options = {
     currentPage: req.query.currentPage || 1,
     perPage: req.query.perPage || 10,
@@ -33,13 +33,14 @@ router.get("/", auth.checkAuth, async function (req, res, next) {
   })
 });
 
-router.get("/new", auth.checkAuth, function(req, res, next) {
+router.get("/new", auth.checkAuth, auth.checkRole(0), function(req, res, next) {
   res.render("users/new")
 })
 
 // TODO: 임시 사용자 등록, Session이 생기면 Validation이후 Falsh를 이용한 처리가 필요함.
-router.post("/", auth.checkAuth, async function(req, res, next) {
-  const {username, password, confirm_password} = req.body;
+router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, next) {
+  console.log(req.body)
+  const {username, password, confirm_password, role} = req.body;
   const currentUser = req.user;
 
   if(password.length < 6) {
@@ -58,10 +59,16 @@ router.post("/", auth.checkAuth, async function(req, res, next) {
     return res.redirect('/users/new')
   }
 
+  if(role == undefined || role.length <= 0) {
+    req.flash('error', '권한을 선택해주세요.')
+    return res.redirect('/users/new')
+  }
+
   await userService.create({
     username,
     password,
-    group_id: currentUser.group_id
+    group_id: currentUser.group_id,
+    role: role
   })
 
   res.redirect("/users");

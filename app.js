@@ -5,17 +5,19 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 const passportConfig = require('./utils/passport');
 const flash = require('connect-flash');
+
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var datasRouter = require("./routes/datas");
 var projectsRouter = require("./routes/projects");
 var groupRouter = require("./routes/groups");
+
+const initSession = require('./utils/session')
 
 // swagger initialize
 const options = {
@@ -35,14 +37,8 @@ var app = express();
 app.locals.moment = require("moment");
 app.locals.util = require("./utils");
 
-app.use(
-  session({
-    name: "mysession",
-    secret: "qwer1234",
-    resave: true,
-    saveUninitialized: true
-  })
-)
+
+initSession(app);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -64,7 +60,6 @@ app.use(function(req, res, next) {
   if(req.user) {
     res.locals.currentUser = req.user
   }
-  console.log(req.user)
   next()
 })
 
