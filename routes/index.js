@@ -30,8 +30,6 @@ router.get("/", async function (req, res, next) {
   pageOption.path = req.path;
   pageOption.query = req.query;
 
-  console.log(pageOption);
-
   res.render("index", {
     title: "QUFA 통합관리시스템",
     data,

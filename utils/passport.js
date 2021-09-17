@@ -27,7 +27,6 @@ module.exports = () => {
       }
 
       const isPasswordMatched = userService.validateUserPassword(user, password)
-      console.log(isPasswordMatched)
       if(isPasswordMatched) {
         return done(null, user);
       } else {

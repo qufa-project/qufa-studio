@@ -31,8 +31,15 @@ router.get("/", auth.checkAuth, auth.checkRole(0), async function (req, res, nex
   };
 
   const users = await userService.findAllByGroup(options)
+
+  options.currentPage = parseInt(options.currentPage);
+  options.total = Math.ceil(users.count / options.perPage);
+  options.path = req.path;
+  options.query = req.query;
+
   res.render("users/index", {
-    users: users
+    users: users.rows,
+    pageOption: options
   })
 });
 
@@ -51,7 +58,6 @@ router.get("/new", auth.checkAuth, auth.checkRole(0), async function(req, res, n
 
 // TODO: 임시 사용자 등록, Session이 생기면 Validation이후 Falsh를 이용한 처리가 필요함.
 router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, next) {
-  console.log(req.body)
   const {username, password, confirm_password, role, groupId} = req.body;
   const currentUser = req.user;
 
@@ -77,7 +83,6 @@ router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, nex
   }
 
   if(currentUser.group.id != groupId && currentUser.group.id != 1) {
-    console.log(currentUser.group.id)
     req.flash('error', '해당 그룹의 사용자를 생성 할 권한이 없습니다.')
     return res.redirect('/users/new')
   }

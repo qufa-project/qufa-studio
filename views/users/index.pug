@@ -1,14 +1,7 @@
 extends ../layout
 
-mixin roleString(role)
-  case role
-    when 0
-      | 관리자
-    when 1
-      | 일반 사용자
-    default
-      | ??
-  
+include ../fragments/_role
+
 block content
   .row
     .col.s12.mb-2
@@ -33,6 +26,9 @@ block content
                   +roleString(user.role)
                 td.center=moment(user.updatedAt).format("yyyy/MM/DD HH:mm")
                 td.center=moment(user.createdAt).format("yyyy/MM/DD HH:mm")
+    
+    include ../fragments/_pagination
+    +pagination(pageOption)
 
     .col.s12.right-align
         a.waves-effect.waves-light.btn.modal-trigger(href='/users/new')

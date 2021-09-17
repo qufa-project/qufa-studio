@@ -22,9 +22,7 @@ class UserService {
     return new Promise(async (resolve, reject) => {
       options.perPage = options.perPage || DATA_DEFAULT_PER_PAGE;
 
-      const offset = (options.currentPage - 1) * options.perPage;
-      const groupId = options.groupId
-      
+      const offset = (options.currentPage - 1) * options.perPage;      
       const findOption = {
         offset: offset,
         limit: options.perPage,
@@ -34,12 +32,9 @@ class UserService {
             model: Group,
             as: "group",
           },
-        ]
-      }
-
-      if(groupId >= 2) {
-        findOption['where'] = {
-          group_id: {
+        ],
+        where: {
+          group_id:{
             [Op.eq]: options.groupId
           }
         }
@@ -47,7 +42,7 @@ class UserService {
 
       try {
         const users = await User.findAndCountAll(findOption);
-        resolve(users.rows);
+        resolve(users);
       } catch (err) {
         reject(err);
       }

@@ -1,10 +1,40 @@
 extends ../layout
 
+include ../fragments/_role
+
 block content
   .row
     .col.s12
       h4.title=group.name
       p=group.description
+
+  .row
+    .col.s12.mb-2
+      h4.title=`${group.name} 사용자 목록`
+      .table-responsive
+        table
+          thead
+            tr
+              th.center ID
+              th.center username
+              th.center group
+              th.center 권한
+              th.center 수정일
+              th.center 생성일
+          tbody
+            each user in users
+              tr
+                td.center=user.id
+                td.center
+                  a(href=`/users/${user.id}`)=user.username
+                td.center=user.group.name
+                td.center 
+                  +roleString(user.role)
+                td.center=moment(user.updatedAt).format("yyyy/MM/DD HH:mm")
+                td.center=moment(user.createdAt).format("yyyy/MM/DD HH:mm")
+    
+    include ../fragments/_pagination
+    +pagination(pageOption)
 
   .col.s12.right-align
         a.waves-effect.waves-light.btn.modal-trigger(href=`/users/new?groupId=${group.id}`)
