@@ -1,4 +1,4 @@
-const { Project, Dataset } = require("../models");
+const { Project, Dataset, Meta } = require("../models");
 
 const DATA_DEFAULT_PER_PAGE = 10;
 
@@ -14,6 +14,11 @@ class ProjectService {
     });
   };
 
+  async find(id) {
+    const project = await Project.findByPk(id);
+    return project;
+  }
+
   async findWithDatasets(id) {
     const project = await Project.findOne({
       where: { id: id },
@@ -21,6 +26,12 @@ class ProjectService {
         {
           model: Dataset,
           as: "datasets",
+          include: [
+            {
+              model: Meta,
+              as: "metas",
+            },
+          ],
         },
       ],
     });

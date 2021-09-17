@@ -23,22 +23,31 @@ router.get("/", async function (req, res, next) {
 router.post("/", async function (req, res, next) {
   const project = await projectService.create(req.body);
   if (project && project.id) {
-    res.redirect(301, `/projects/${project.id}`);
+    res.redirect(301, `/projects/${project.id}/init`);
   }
 
   res.render("projects/error", { title: "QUFA 프로젝트 오류", project });
 });
 
-/* GET home page. */
-router.get("/new", function (req, res, next) {
+router.get("/:id/init", async function (req, res, next) {
+  const project = await projectService.find(req.params.id);
+  res.render("projects/init", { title: "QUFA 프로젝트 데이터 등록", project });
+});
+
+router.get("/new", async function (req, res, next) {
+  const project = await projectService.findWithDatasets(req.params.id);
   res.render("projects/new", { title: "QUFA 프로젝트 등록" });
 });
 
 router.get("/:id", async function (req, res, next) {
   const project = await projectService.findWithDatasets(req.params.id);
-  console.log(project);
+  const dataset = project.originDataset();
 
-  res.render("projects/show", { title: `QUFA - ${project.title}`, project });
+  res.render("projects/show", {
+    title: `QUFA - ${project.title}`,
+    project,
+    dataset,
+  });
 });
 
 router.get("/:id/back", async function (req, res, next) {

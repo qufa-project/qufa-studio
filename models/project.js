@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class Project extends Model {
     /**
@@ -12,6 +13,13 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Dataset, {
         as: "datasets",
         foreignKey: "project_id",
+      });
+    }
+
+    originDataset(models) {
+      // TODO: Dataset에 정의된 constant 활용
+      return this.datasets.find((dataset) => {
+        return dataset.processType === "origin" && dataset.status == "done";
       });
     }
   }

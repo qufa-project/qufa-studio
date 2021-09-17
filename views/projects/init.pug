@@ -1,0 +1,170 @@
+extends ../layout
+
+block content
+  .row
+    .col.s12
+      h4.title=project.title
+      p=project.description
+
+  include _file_form
+
+block scripts
+  script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+  script(src='/javascripts/app/handlebars-helper.js')
+  script(src='/javascripts/app/file-uploader.js')
+  script(src='/javascripts/ext/papa-parser/papaparse.min.js')
+  script(src='/javascripts/ext/momentjs/moment-with-locales.min.js')
+  script.
+    $(function(){
+      var projectId = "#{project.id}";
+
+      $("select").formSelect();
+
+      if ($("#file-upload-form").length) {
+        var metaFormTemplate;
+        var colTypeOrders = ["string", "number", "date", "boolean"];
+        $.get("/javascripts/templates/data/metaForm.hbs", function(t) {
+          metaFormTemplate = Handlebars.compile(t);
+        });
+
+        var fileUploader = new FileUploader();
+
+        $("#extract-btn").click(function(e) {
+          var f = fileUploader.getFiles()[0];
+          var csvConfig = {
+            delimiter: $("#delimiter").val(),
+            header: $("#has-header").is(":checked"),
+            encoding: $("#encoding").val(),
+            preview: 10,
+            complete: function(results, file) {
+              renderMetaForm(results);
+            }
+          }
+
+          Papa.parse(f, csvConfig);
+        });
+
+        function findType(value) {
+          if (!Number.isNaN(value) && !Number.isNaN(Number(value))) {
+            return "number";
+          }
+
+          if (moment(value).isValid()) {
+            return "date";
+          }
+
+          return "string";
+        }
+
+        function fixColType(before, after) {
+          if (!before) {
+            return after;
+          }
+          
+          if (!after) {
+            return before;
+          }
+
+          if (colTypeOrders.indexOf(before) < colTypeOrders.indexOf(after)) {
+            return before;
+          }
+
+          return after
+        }
+
+        function renderMetaForm(csvResults) {
+          var lang = $("#header-lang").val();
+          var headers = csvResults.meta.fields;
+          if (!headers) {
+            headers = new Array(Object.keys(csvResults.data[0]).length);
+          }
+
+          var cols = [];
+          for (var header of headers) {
+            var colObj = {
+              maxLen: 0,
+              name: header,
+            };
+
+            if (lang == "ko") {
+              colObj.koName = header;
+            } else {
+              colObj.enName = header;
+            }
+
+            cols.push(colObj);
+          }
+
+          for (var rowItem of csvResults.data) {
+            for (var col of cols) {
+              var value = rowItem[col.name];
+              col.type = findType(value);
+              if (col.type == "number") {
+                col.maxLen = Math.max(10, ("" + value).length + 5);  
+              } else if (col.type == "string") {
+                col.maxLen = Math.max(50, ("" + value).length + 25);
+              } else {
+                col.maxLen = Math.max(col.maxLen, ("" + value).length);
+              }
+            }
+          }
+
+          var metaFormHtml = metaFormTemplate(cols);
+          
+          $(".csv-cols-wrap").html(metaFormHtml);
+          $(".meta-form-select").formSelect({
+            classes: "meta-form-select"
+          });
+          $('.tooltipped').tooltip();
+        }
+        
+        $(document).on("click", "#save-meta-btn", function() {
+          var formData = new FormData();
+          formData.append("projectId", projectId);
+          formData.append('file', fileUploader.getFiles()[0]);
+
+          var parseOption = {
+            delimiter: $("#delimiter").val(),
+            header: $("#has-header").is(":checked"),
+            encoding: $("#encoding").val()
+          };
+          formData.append('parseOption', JSON.stringify(parseOption));
+
+          var meta = [];
+          $(".meta-form-row").each(function(idx, row) {
+            meta.push({
+              name: $(row).find(".name").val() || "col" + (idx + 1),
+              koName: $(row).find(".ko-name").val(),
+              dataType: $(row).find(".data-type").val(),
+              maxLength: $(row).find(".max-length").val(),
+              floatLength: $(row).find(".float-length").val(),
+              dateFormat: $(row).find(".date-format").val(),
+              trueValue: $(row).find(".true-value").val(),
+              isNotNull: $(row).find(".is-not-null").is(":checked"),
+              isUnique: $(row).find(".is-unique").is(":checked"),
+              isIndex: $(row).find(".is-index").is(":checked")
+            });
+          });
+          formData.append('meta', JSON.stringify(meta));
+          
+          $(".loading").addClass("active");
+    
+          $.ajax({
+            url: '/datasets',
+            data: formData,
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            success: function(d) {
+              $(".loading").removeClass("active");
+              window.location.href = "/projects/" + d.id;
+            }, error: function(err) {
+              $(".loading").removeClass("active");
+              alert("데이터를 등록 할 수 없습니다.")
+              console.error(err);
+            }
+          })
+        });
+      }
+    });
+    

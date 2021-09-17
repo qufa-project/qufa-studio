@@ -6,8 +6,11 @@ const axios = require("axios");
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
-var DatasetManager = require("../lib/DatasetManager");
-var ChildProcessManager = require("../lib/ChildProcessManager");
+const profileConfig = require("../configs/config").profiler;
+
+const DatasetManager = require("../lib/DatasetManager");
+const RawDataManager = require("../lib/RawDataManager");
+const ChildProcessManager = require("../lib/ChildProcessManager");
 
 router.post("/", upload.single("file"), async function (req, res, next) {
   try {
@@ -26,6 +29,44 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     res.json({ id: dataset.id });
   } catch (err) {
     return next(err);
+  }
+});
+
+router.get("/:id", async function (req, res, next) {
+  const dataset = await DatasetManager.findWithMeta(req.params.id);
+  const options = {
+    currentPage: req.query.currentPage || 1,
+    perPage: req.query.perPage || 50,
+    sortCol: req.query.sortCol || "id",
+    sortDir: req.query.sortDir || "asc",
+  };
+
+  const results = await RawDataManager.search(dataset, options);
+  res.json({ dataset, results });
+});
+
+router.get("/:id/profile", async function (req, res, next) {
+  const dataset = await DatasetManager.find(req.params.id);
+
+  try {
+    const response = await axios.get(
+      `${profileConfig.baseUrl}/profile/${dataset.dataTable}`
+    );
+
+    if (
+      !dataset.hasProfile &&
+      response &&
+      response.data &&
+      response.data.status == "success"
+    ) {
+      dataset.hasProfile = true;
+      await dataset.save();
+    }
+
+    res.json(response.data);
+  } catch (err) {
+    console.error(err);
+    res.json(null);
   }
 });
 

@@ -6,166 +6,314 @@ block content
       h4.title=project.title
       p=project.description
 
-  if !project.datasets.length
-    include _file_form
+  if dataset
+    .row
+      .col.s12
+        ul.tabs
+          li.tab
+            a(href='#tab-preview' data-tab='preview') 데이터 미리보기
+      #tab-preview.col.s12.table-responsive
+        table.preview-table
+          thead
+            tr
+              each meta, index in dataset.metas
+                th.min.col-header(data-col=meta.name)
+                  a.filter-btn(href='#' data-col=meta.name data-idx=index)
+                    span.material-icons sort
+    
+                  | #{meta.name}
+                  br
+                  small
+                    | #{meta.colType}
+            tr
+              each meta in dataset.metas
+                th.num-chart-wrap
+                  .num-chart(id="profile-" + meta.name)
+          tbody#rows
+        #rows-pagination
+  else
+
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
   script(src='/javascripts/app/handlebars-helper.js')
-  script(src='/javascripts/app/file-uploader.js')
-  script(src='/javascripts/ext/papa-parser/papaparse.min.js')
-  script(src='/javascripts/ext/momentjs/moment-with-locales.min.js')
+  script(src='https://cdn.amcharts.com/lib/4/core.js')
+  script(src='https://cdn.amcharts.com/lib/4/charts.js')
+  script(src='https://cdn.amcharts.com/lib/4/themes/animated.js')
   script.
-    $(function(){
-      var projectId = "#{project.id}";
+    am4core.addLicense("CH204832145");
+    $(document).ready(function(){
+      var metaTemplate;
+      var rowsTemplate;
+      var profileTemplate;
+      var pageTemplate;
+      var featureTemplate;
 
-      $("select").formSelect();
-
-      if ($("#file-upload-form").length) {
-        var metaFormTemplate;
-        var colTypeOrders = ["string", "number", "date", "boolean"];
-        $.get("/javascripts/templates/data/metaForm.hbs", function(t) {
-          metaFormTemplate = Handlebars.compile(t);
+      var t1 = function() {
+        return $.get("/javascripts/templates/data/meta.hbs", function(t) {
+          metaTemplate = Handlebars.compile(t);
         });
-
-        var fileUploader = new FileUploader();
-
-        $("#extract-btn").click(function(e) {
-          var f = fileUploader.getFiles()[0];
-          var csvConfig = {
-            delimiter: $("#delimiter").val(),
-            header: $("#has-header").is(":checked"),
-            encoding: $("#encoding").val(),
-            preview: 10,
-            complete: function(results, file) {
-              renderMetaForm(results);
-            }
-          }
-
-          Papa.parse(f, csvConfig);
+      }
+      var t2 = function() {
+        return $.get("/javascripts/templates/data/rows.hbs", function(t) {
+          rowsTemplate = Handlebars.compile(t);
         });
+      }
+      var t3 = function() {
+        return $.get("/javascripts/templates/fragments/pagination.hbs", function(t) {
+          pageTemplate = Handlebars.compile(t);
+        });
+      }
+      var t4 = function() {
+        return $.get("/javascripts/templates/data/profile.hbs", function(t) {
+          profileTemplate = Handlebars.compile(t);
+        });
+      }
 
-        function findType(value) {
-          if (!Number.isNaN(value) && !Number.isNaN(Number(value))) {
-            return "number";
-          }
+      $.when(t1(), t2(), t3(), t4())
+        .done(findMetaWithData());
 
-          if (moment(value).isValid()) {
-            return "date";
-          }
+      var hasMoreData = true;
+      var searchOption = {
+        currentPage: 1,
+        perPage: 50,
+      }
+      var totalRows = 0;
 
-          return "string";
+      var dataRows;
+      function findMetaWithData(isForced) {
+        if (!$(".loading").hasClass("active")) {
+          $(".loading").addClass("active")
         }
 
-        function fixColType(before, after) {
-          if (!before) {
-            return after;
-          }
-          
-          if (!after) {
-            return before;
-          }
+        $(".data-filter-box").hide();
 
-          if (colTypeOrders.indexOf(before) < colTypeOrders.indexOf(after)) {
-            return before;
-          }
+        if (!dataRows || isForced) {
+          $.getJSON("/datasets/" + #{dataset.id}, searchOption, function(d) {
+            var metaHtml = metaTemplate(d.dataset.metas);
+            $("#meta-wrap").html(metaHtml);
 
-          return after
-        }
-
-        function renderMetaForm(csvResults) {
-          var lang = $("#header-lang").val();
-          var headers = csvResults.meta.fields;
-          if (!headers) {
-            headers = new Array(Object.keys(csvResults.data[0]).length);
-          }
-
-          var cols = [];
-          for (var header of headers) {
-            var colObj = {
-              maxLen: 0,
-              name: header,
-            };
-
-            if (lang == "ko") {
-              colObj.koName = header;
-            } else {
-              colObj.enName = header;
+            if (d.results && d.results.rows && d.results.rows.length) {
+              dataRows = d.results.rows;
+              var rowsHtml = rowsTemplate(d.results.rows);
+              $("#rows").html(rowsHtml);
             }
 
-            cols.push(colObj);
-          }
+            totalRows = d.results.count.cnt;
 
-          for (var rowItem of csvResults.data) {
-            for (var col of cols) {
-              var value = rowItem[col.name];
-              col.type = findType(value);
-              if (col.type == "number") {
-                col.maxLen = Math.max(10, ("" + value).length + 5);  
-              } else if (col.type == "string") {
-                col.maxLen = Math.max(50, ("" + value).length + 25);
-              } else {
-                col.maxLen = Math.max(col.maxLen, ("" + value).length);
+            var pageInfo = {
+              currentPage: searchOption.currentPage,
+              total: Math.ceil(totalRows / searchOption.perPage),
+              pages: []
+            }
+
+            for(var i = pageInfo.currentPage-3; i <= pageInfo.currentPage + 3; ++i) {
+              if (i > 0) {
+                pageInfo.pages.push(i);
               }
             }
-          }
+            
+            var paginationHtml = pageTemplate(pageInfo);
+            $("#rows-pagination").html(paginationHtml);
 
-          var metaFormHtml = metaFormTemplate(cols);
-          
-          $(".csv-cols-wrap").html(metaFormHtml);
-          $(".meta-form-select").formSelect({
-            classes: "meta-form-select"
+            $(".loading").removeClass("active");
           });
-          $('.tooltipped').tooltip();
+        } else {
+          $(".loading").removeClass("active");
         }
-        
-        $(document).on("click", "#save-meta-btn", function() {
-          var formData = new FormData();
-          formData.append("projectId", projectId);
-          formData.append('file', fileUploader.getFiles()[0]);
+      }
 
-          var parseOption = {
-            delimiter: $("#delimiter").val(),
-            header: $("#has-header").is(":checked"),
-            encoding: $("#encoding").val()
-          };
-          formData.append('parseOption', JSON.stringify(parseOption));
+      var tempSortCol;
+      var tempSortDir;
 
-          var meta = [];
-          $(".meta-form-row").each(function(idx, row) {
-            meta.push({
-              name: $(row).find(".name").val() || "col" + (idx + 1),
-              koName: $(row).find(".ko-name").val(),
-              dataType: $(row).find(".data-type").val(),
-              maxLength: $(row).find(".max-length").val(),
-              floatLength: $(row).find(".float-length").val(),
-              dateFormat: $(row).find(".date-format").val(),
-              trueValue: $(row).find(".true-value").val(),
-              isNotNull: $(row).find(".is-not-null").is(":checked"),
-              isUnique: $(row).find(".is-unique").is(":checked"),
-              isIndex: $(row).find(".is-index").is(":checked")
-            });
-          });
-          formData.append('meta', JSON.stringify(meta));
+      $(document).on("click", ".filter-btn", function(e) {
+        e.preventDefault();
+        var selectedCol = $(this).data('col');
+        var targetCol = ".col-header[data-col='" + selectedCol + "']";
+
+        tempSortCol = selectedCol;
+
+        $(".data-filter-box").detach().appendTo(targetCol);
+        $(".data-filter-box").show();
+      });
+
+      $(document).on("click", ".sort-btn", function(e) {
+        $(".sort-btn").removeClass("active");
+        $(this).addClass("active");
+
+        tempSortDir = $(this).data("direction");
+      });
+
+      $(document).on("click", ".apply-filter-btn", function(e) {
+        if (tempSortCol && tempSortDir) {
+          searchOption.sortCol = tempSortCol;
+          searchOption.sortDir = tempSortDir;
+
+          searchOption.currentPage = 1;
+          findMetaWithData(true);
+        }
+      });
+
+      $(document).on("click", ".cancel-filter-btn", function(e) {
+        tempSortCol = null;
+        tempSortDir = null;
+
+        delete searchOption.sortCol;
+        delete searchOption.sortDir;
+      });
+
+      $(document).on("click", ".page-num", function(e) {
+        e.preventDefault();
+        var page = $(this).data("page");
+        searchOption.currentPage = page;
+        findMetaWithData(true);
+      });
+      
+
+      $(document).on("click", ".cancel-filter-btn", function(e) {
+        $(".data-filter-box").hide();
+      });
+
+      var profileResult;
+      if (!profileResult) {
+        $.getJSON("/datasets/" + #{dataset.id} + "/profile", function(d) {
+          if (d && d.status == "success") {
+            profileResult = d.results;
+
+            var profileHtml = profileTemplate(profileResult);
+            $("#profile-wrap").html(profileHtml);
+
+            renderProfileChart(profileResult);
+          }
+        });
+      }
+
+      function renderProfileChart(results) {
+        for (var i = 1; i < results.length; i++) {
+          var result = results[i];
+          var profileColId = "profile-" + result.columnName;
+
+          if (result.rowCnt == result.uniqueCnt) {
+            var uniqueHtml = [];
+            uniqueHtml.push("<div class='profile-value'>");
+            uniqueHtml.push("<h4 class='center-align'>" + result.uniqueCnt + "</h4>");
+            uniqueHtml.push("<div class='center-align'><small>Unique values</small></div>");
+            uniqueHtml.push("</div>");
+
+            $("#" + profileColId).html(uniqueHtml.join(""));
+          } else if (result.vfs && result.vfs.length) {
+            renderBarChart(profileColId, result.vfs);
+          } else if (result.columnType == "DECIMAL") {
+            var numberHtml = [];
+            numberHtml.push("<div class='profile-value'>");
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Max: </span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMaxVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Min: </span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMinVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Mean</span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMeanVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+
+            numberHtml.push(" <div>");
+            numberHtml.push(" <span>Median</span>");
+            numberHtml.push(" <span class='value'>");
+            numberHtml.push(result.numMedianVal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            numberHtml.push(" </span>");
+            numberHtml.push(" </div>");
+            numberHtml.push("</div>");
+
+            $("#" + profileColId).html(numberHtml.join(""));
+          } else {
+            var stringHtml = [];
+            stringHtml.push("<div class='profile-value'>");
+            stringHtml.push(" <div>");
+            stringHtml.push(" <span>Distinct: </span>");
+            stringHtml.push(" <span class='value'>");
+            stringHtml.push(result.distinctCnt.toLocaleString());
+            stringHtml.push(" </span>");
+            stringHtml.push(" </div>");
+
+            stringHtml.push(" <div>");
+            stringHtml.push(" <span>Duplicate: </span>");
+            stringHtml.push(" <span class='value'>");
+            stringHtml.push(result.duplicateCnt.toLocaleString());
+            stringHtml.push(" </span>");
+            stringHtml.push(" </div>");
+            numberHtml.push("</div>");
+
+            $("#" + profileColId).html(stringHtml.join(""));
+          }
+        }
+      }
+
+      function renderBarChart(chartId, items) {
+        am4core.ready(function() {
+          am4core.useTheme(am4themes_animated);
+          // Themes end
+          // Create chart instance
+
+          var chart = am4core.create(chartId, am4charts.XYChart);
+          chart.data = items;
           
-          $(".loading").addClass("active");
-    
-          $.ajax({
-            url: '/datasets',
-            data: formData,
-            type: 'POST',
-            contentType: false,
-            processData: false,
-            success: function(d) {
-              $(".loading").removeClass("active");
-              window.location.href = "/projects/" + d.id;
-            }, error: function(err) {
-              $(".loading").removeClass("active");
-              alert("데이터를 등록 할 수 없습니다.")
-              console.error(err);
-            }
-          })
+          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+          categoryAxis.autoGridCount = true;
+          categoryAxis.dataFields.category = "columnGroupVal";
+          categoryAxis.renderer.minGridDistance = 80;
+          
+          // category axis label 길이 제한
+          var label = categoryAxis.renderer.labels.template;
+          label.fill = am4core.color("#fff");
+          label.dx = 0;
+          label.fontWeight = "200";
+          label.truncate = true;
+          label.maxWidth = 80;
+          label.fontSize = 10;
+          
+
+          //- categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
+          //-   if (target.dataItem && target.dataItem.index & 2 == 2) {
+          //-     return dy + 25;
+          //-   }
+          //-   return dy;
+          //- });
+
+          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+          valueAxis.renderer.line.disabled = true; //disables axis line
+          valueAxis.renderer.labels.template.disabled = true; //disables labels
+          valueAxis.renderer.grid.template.disabled = true;  //disables grid
+
+          
+          // Create series
+          var series = chart.series.push(new am4charts.ColumnSeries());
+          series.dataFields.valueY = "columnGroupCount";
+          series.dataFields.categoryX = "columnGroupVal";
+          series.name = "Count";
+          series.columns.template.fillOpacity = .8;
+          series.columns.template.fill = am4core.color("#48dac5");
+          series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+          
+          series.tooltip.getFillFromObject = false;
+          series.tooltip.background.fill = am4core.color("#fff");
+          series.tooltip.fontWeight = "200";
+          series.tooltip.label.fill = am4core.color("#000");
+          series.tooltip.label.fontSize = 10;
+
+          var columnTemplate = series.columns.template;
+          columnTemplate.strokeWidth = 1;
+          columnTemplate.strokeOpacity = 0.3;
         });
       }
     });
-    
