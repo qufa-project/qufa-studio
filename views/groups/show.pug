@@ -5,3 +5,8 @@ block content
     .col.s12
       h4.title=group.name
       p=group.description
+
+  .col.s12.right-align
+        a.waves-effect.waves-light.btn.modal-trigger(href=`/users/new?groupId=${group.id}`)
+          i.material-icons.left add
+          | 신규 사용자 생성

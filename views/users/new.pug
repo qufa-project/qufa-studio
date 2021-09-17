@@ -5,8 +5,10 @@ block content
     .col.s12
       h1 신규 사용자 등록
         form(action="/users" method="post")
+          .input-field.hide
+            input(type="text" name="groupId" value=group?group.id:currentUser.group.id)
           .input-field
-            input#group.validate(type="text" name="group" value=currentUser.group.name disabled)
+            input#group.validate(type="text" name="group" value=group?group.name:currentUser.group.name disabled)
             label(for="group") Group
 
           .input-field

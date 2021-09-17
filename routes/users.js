@@ -1,4 +1,5 @@
 var express = require("express");
+const GroupService = require("../services/GroupsService");
 const UserService = require("../services/UserService");
 var router = express.Router();
 const auth = require('../utils/auth')
@@ -17,6 +18,7 @@ var users = [
 ]
 
 const userService = new UserService();
+const groupService = new GroupService();
 
 /* GET users listing. */
 router.get("/", auth.checkAuth, auth.checkRole(0), async function (req, res, next) {
@@ -33,14 +35,23 @@ router.get("/", auth.checkAuth, auth.checkRole(0), async function (req, res, nex
   })
 });
 
-router.get("/new", auth.checkAuth, auth.checkRole(0), function(req, res, next) {
-  res.render("users/new")
+router.get("/new", auth.checkAuth, auth.checkRole(0), async function(req, res, next) {
+  const {groupId} = req.query
+
+  let group;
+  if(groupId != undefined) {
+    group = await groupService.findById(groupId);
+  }
+
+  res.render("users/new", {
+    group
+  })
 })
 
 // TODO: 임시 사용자 등록, Session이 생기면 Validation이후 Falsh를 이용한 처리가 필요함.
 router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, next) {
   console.log(req.body)
-  const {username, password, confirm_password, role} = req.body;
+  const {username, password, confirm_password, role, groupId} = req.body;
   const currentUser = req.user;
 
   if(password.length < 6) {
@@ -64,10 +75,15 @@ router.post("/", auth.checkAuth, auth.checkRole(0), async function(req, res, nex
     return res.redirect('/users/new')
   }
 
+  if(currentUser.group.id !== groupId && currentUser.group.id != 1) {
+    req.flash('error', '해당 그룹의 사용자를 생성 할 권한이 없습니다.')
+    return res.redirect('/users/new')
+  }
+
   await userService.create({
     username,
     password,
-    group_id: currentUser.group_id,
+    group_id: groupId,
     role: role
   })
 
