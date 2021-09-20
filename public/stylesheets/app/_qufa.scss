@@ -6,6 +6,10 @@
     border: 2px solid #fff;
     display: inline-block;
     margin-right: 16px;
+
+    &:hover {
+      cursor: move;
+    }
   }
 }
 
@@ -19,6 +23,28 @@
     border: 2px solid #fff;
     color: #000;
     padding: 8px 16px;
-    margin-right: 16px;
+    margin-right: 32px;
+    position: relative;
+
+    &:hover {
+      cursor: move;
+    }
+
+    &:after {
+      content: ">";
+      display: inline-block;
+      position: absolute;
+      right: -20px;
+      color: #fff;
+    }
+
+    &:last-child,
+    &.ui-draggable-dragging {
+      &:after {
+        content: "";
+        right: 0px;
+        color: #fff;
+      }
+    }
   }
 }

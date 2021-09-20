@@ -11,7 +11,11 @@ block content
       .col.s12
         ul.tabs
           li.tab
-            a(href='#tab-preview' data-tab='preview') 데이터 미리보기
+            a.active(href='#tab-preview' data-tab='preview') 데이터 미리보기
+          each task in project.tasks
+            li.tab
+              a(href=`/projects/${project.id}/tasks/${task.task}`)=`${task.getTaskMsg()}(${task.getStatusMsg()})`
+
       #tab-preview.col.s12.table-responsive
         table.preview-table
           thead
@@ -50,6 +54,7 @@ block scripts
     | var datasestId = #{dataset.id};
     include scripts/dataset.js
   script.
+    var projectId = #{project.id};
     $(document).ready(function(){
       $('.fixed-action-btn').floatingActionButton();
       $('.tooltipped').tooltip();
@@ -65,5 +70,21 @@ block scripts
         revert: "invalid"
       });
       $( "ul, li" ).disableSelection();
+
+      $(document).on("click", ".save-task", function(e) {
+        e.preventDefault();
+
+        var tasks = $( "#qufa-tasks-box" ).sortable( "toArray", { attribute: "data-task" } );
+        $.ajax({
+          url: "/projects/" + projectId + "/tasks",
+          type: "post",
+          contentType: "application/json",
+          data: JSON.stringify(tasks),
+          success: function(d) {
+            console.log(d);
+          }
+        })
+        console.log(tasks);
+      })
     });
     

@@ -29,7 +29,9 @@ $(document).ready(function () {
     });
   };
 
-  $.when(t1(), t2(), t3(), t4()).done(findMetaWithData());
+  $.when(t1(), t2(), t3(), t4()).done(function () {
+    findMetaWithData();
+  });
 
   var hasMoreData = true;
   var searchOption = {
@@ -79,9 +81,27 @@ $(document).ready(function () {
         $("#rows-pagination").html(paginationHtml);
 
         $(".loading").removeClass("active");
+
+        renderProfileResult();
       });
     } else {
       $(".loading").removeClass("active");
+    }
+  }
+
+  var profileResult;
+  function renderProfileResult() {
+    if (!profileResult) {
+      $.getJSON("/datasets/" + datasestId + "/profile", function (d) {
+        if (d && d.status == "success") {
+          profileResult = d.results;
+
+          var profileHtml = profileTemplate(profileResult);
+          $("#profile-wrap").html(profileHtml);
+
+          renderProfileChart(profileResult);
+        }
+      });
     }
   }
 
@@ -134,20 +154,6 @@ $(document).ready(function () {
   $(document).on("click", ".cancel-filter-btn", function (e) {
     $(".data-filter-box").hide();
   });
-
-  var profileResult;
-  if (!profileResult) {
-    $.getJSON("/datasets/" + datasestId + "/profile", function (d) {
-      if (d && d.status == "success") {
-        profileResult = d.results;
-
-        var profileHtml = profileTemplate(profileResult);
-        $("#profile-wrap").html(profileHtml);
-
-        renderProfileChart(profileResult);
-      }
-    });
-  }
 
   function renderProfileChart(results) {
     for (var i = 1; i < results.length; i++) {

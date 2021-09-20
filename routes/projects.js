@@ -20,6 +20,17 @@ router.get("/", async function (req, res, next) {
   res.render("projects/index", { title: "QUFA 프로젝트 목록", projects });
 });
 
+router.get("/:id", async function (req, res, next) {
+  const project = await projectService.findWithRelations(req.params.id);
+  const dataset = project.originDataset();
+
+  res.render("projects/show", {
+    title: `QUFA - ${project.title}`,
+    project,
+    dataset,
+  });
+});
+
 router.post("/", async function (req, res, next) {
   const project = await projectService.create(req.body);
   if (project && project.id) {
@@ -39,15 +50,16 @@ router.get("/new", async function (req, res, next) {
   res.render("projects/new", { title: "QUFA 프로젝트 등록" });
 });
 
-router.get("/:id", async function (req, res, next) {
-  const project = await projectService.findWithDatasets(req.params.id);
-  const dataset = project.originDataset();
+router.post("/:id/tasks", async function (req, res, next) {
+  const project = await projectService.findWithTasks(req.params.id);
+  console.log(project);
+  const taskList = req.body;
 
-  res.render("projects/show", {
-    title: `QUFA - ${project.title}`,
-    project,
-    dataset,
-  });
+  if (taskList && taskList.length) {
+    const tasks = projectService.createTasks(project, taskList);
+  }
+
+  res.json({});
 });
 
 router.get("/:id/back", async function (req, res, next) {
