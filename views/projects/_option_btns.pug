@@ -6,11 +6,11 @@
       a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="태스크 정의")
         i.material-icons account_tree
     li
-      a.btn-floating.yellow.darken-1
+      a.btn-floating.yellow.darken-1.modal-trigger.tooltipped(href="#profile-modal" data-position="left" data-tooltip="프로파일링 상세결과")
         i.material-icons description
     li
-      a.btn-floating.green
-        i.material-icons account_tree
+      a.btn-floating.green.tooltipped(data-position="left" data-tooltip="시각화")
+        i.material-icons analytics
     li
-      a.btn-floating.blue(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="다운로드")
+      a.btn-floating.blue.tooltipped(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="다운로드")
         i.material-icons file_download

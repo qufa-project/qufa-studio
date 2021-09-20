@@ -33,8 +33,9 @@ block content
         #rows-pagination
   else
 
-  include _task_modal
   include _option_btns
+  include _task_modal
+  include _profile_modal
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
@@ -42,7 +43,7 @@ block scripts
   script(src='https://cdn.amcharts.com/lib/4/core.js')
   script(src='https://cdn.amcharts.com/lib/4/charts.js')
   script(src='https://cdn.amcharts.com/lib/4/themes/animated.js')
-  script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
+  
   script.
     am4core.addLicense("CH204832145");
   script
@@ -50,14 +51,14 @@ block scripts
     include scripts/dataset.js
   script.
     $(document).ready(function(){
-      $('.modal').modal();
       $('.fixed-action-btn').floatingActionButton();
       $('.tooltipped').tooltip();
+      $('.modal').modal();
 
       $( "#qufa-tasks-box" ).sortable({
         revert: true
       });
-      
+
       $( "#qufa-tasks > li" ).draggable({
         connectToSortable: "#qufa-tasks-box",
         helper: "clone",

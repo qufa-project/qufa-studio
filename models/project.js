@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       title: DataTypes.STRING,
       description: DataTypes.STRING,
-      hasTask: DataTypes.BOOLEAN,
+      hasTasks: DataTypes.BOOLEAN,
     },
     {
       sequelize,
