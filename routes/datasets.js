@@ -9,6 +9,7 @@ var upload = multer({ storage: storage });
 const profileConfig = require("../configs/config").profiler;
 
 const DatasetManager = require("../lib/DatasetManager");
+const FileManager = require("../lib/FileManager");
 const RawDataManager = require("../lib/RawDataManager");
 const ChildProcessManager = require("../lib/ChildProcessManager");
 
@@ -68,6 +69,14 @@ router.get("/:id/profile", async function (req, res, next) {
     console.error(err);
     res.json(null);
   }
+});
+
+router.get("/:id/download", async function (req, res, next) {
+  const dataset = await DatasetManager.find(req.params.id);
+  const fileStream = FileManager.createReadStream(dataset.remotePath);
+
+  res.attachment(dataset.originFileName);
+  fileStream.pipe(res);
 });
 
 module.exports = router;
