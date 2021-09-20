@@ -3,14 +3,14 @@
     i.large.material-icons settings
   ul
     li
-      a.btn-floating.red(href=`/datasets/${dataset.id}/download` target="_blank")
-        i.material-icons file_download
+      a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="태스크 정의")
+        i.material-icons account_tree
     li
       a.btn-floating.yellow.darken-1
         i.material-icons description
     li
       a.btn-floating.green
-        i.material-icons publish
+        i.material-icons account_tree
     li
-      a.btn-floating.blue
+      a.btn-floating.blue(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="다운로드")
         i.material-icons file_download

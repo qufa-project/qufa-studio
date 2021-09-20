@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         as: "datasets",
         foreignKey: "project_id",
       });
+
+      this.hasMany(models.Task, {
+        as: "tasks",
+        foreignKey: "project_id",
+      });
     }
 
     originDataset(models) {
@@ -27,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       title: DataTypes.STRING,
       description: DataTypes.STRING,
+      hasTask: DataTypes.BOOLEAN,
     },
     {
       sequelize,
