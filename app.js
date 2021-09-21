@@ -10,6 +10,10 @@ var LocalStrategy = require("passport-local").Strategy;
 const passportConfig = require("./utils/passport");
 const flash = require("connect-flash");
 
+const cron = require("node-cron");
+const TaskService = require("./services/TaskService");
+const taskService = new TaskService();
+
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var datasRouter = require("./routes/datas");
@@ -102,6 +106,26 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render("error");
+});
+
+// Task 처리를 위한 Scheduler
+cron.schedule("*/10 * * * * *", async () => {
+  console.log("check task ===================================");
+  try {
+    await taskService.runTask();
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// Task 완료에 따른 데이터 후처리
+cron.schedule("*/10 * * * * *", async () => {
+  console.log("check post task ===================================");
+  try {
+    await taskService.runPostTask();
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 module.exports = app;

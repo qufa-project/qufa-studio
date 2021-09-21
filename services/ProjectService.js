@@ -43,6 +43,27 @@ class ProjectService {
     return project;
   }
 
+  async findWithOriginDataset(id) {
+    const project = await Project.findOne({
+      where: { id: id },
+      include: [
+        {
+          model: Dataset,
+          as: "datasets",
+          where: { processType: Dataset.processTypes.origin },
+          include: [
+            {
+              model: Meta,
+              as: "metas",
+            },
+          ],
+        },
+      ],
+    });
+
+    return project;
+  }
+
   async findWithDatasets(id) {
     const project = await Project.findOne({
       where: { id: id },

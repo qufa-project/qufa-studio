@@ -81,7 +81,10 @@ block scripts
           contentType: "application/json",
           data: JSON.stringify(tasks),
           success: function(d) {
-            console.log(d);
+            if (d && d.length) {
+              alert("태스크 등록이 완료되었습니다. 각각의 태스크는 단계별로 진행됩니다.")
+              location.reload();
+            }
           }
         })
         console.log(tasks);

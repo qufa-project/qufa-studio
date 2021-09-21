@@ -56,10 +56,11 @@ router.post("/:id/tasks", async function (req, res, next) {
   const taskList = req.body;
 
   if (taskList && taskList.length) {
-    const tasks = projectService.createTasks(project, taskList);
+    const tasks = await projectService.createTasks(project, taskList);
+    res.json(tasks);
+  } else {
+    res.json({});
   }
-
-  res.json({});
 });
 
 router.get("/:id/back", async function (req, res, next) {

@@ -79,4 +79,39 @@ router.get("/:id/download", async function (req, res, next) {
   fileStream.pipe(res);
 });
 
+router.get("/:id/features", async function (req, res, next) {
+  const data = await DataManager.findWithFeatures(req.params.id);
+  res.json(data.features);
+});
+
+router.get("/:id/imputation", async function (req, res, next) {
+  const data = await DataManager.find(req.params.id);
+
+  try {
+    const s3Obj = await FileManager.findS3Objct(data.getImputationResultPath());
+    console.log(data.getImputationResultPath());
+    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+  } catch (err) {
+    console.log(err);
+    res.json(null);
+  }
+});
+
+router.get("/:id/outlier", async function (req, res, next) {
+  const data = await DataManager.find(req.params.id);
+
+  try {
+    const s3Obj = await FileManager.findS3Objct(data.getOutlierResultPath());
+    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+  } catch (err) {
+    console.log(err);
+    res.json(null);
+  }
+});
+
+router.get("/:id/importance", async function (req, res, next) {
+  const data = await DataManager.findWithImportance(req.params.id);
+  res.json(data);
+});
+
 module.exports = router;

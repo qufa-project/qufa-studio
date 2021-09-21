@@ -49,9 +49,9 @@ async function run() {
     await RawDataManager.enqueueProfile(dataset);
 
     //Imputation
-    console.log("Call imputation / outlier");
-    await ImputationManager.runImputation(dataset.remotePath);
-    await ImputationManager.runOutlier(dataset.remotePath);
+    // console.log("Call imputation / outlier");
+    // await ImputationManager.runImputation(dataset.remotePath);
+    // await ImputationManager.runOutlier(dataset.remotePath);
 
     // mkfeat
     console.log("MK feat start!");

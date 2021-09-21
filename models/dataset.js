@@ -29,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "project_id",
       });
 
+      this.belongsTo(models.Task, {
+        as: "task",
+        foreignKey: "task_id",
+      });
+
       this.hasMany(models.Meta, { as: "metas", foreignKey: "dataset_id" });
     }
 
@@ -40,25 +45,33 @@ module.exports = (sequelize, DataTypes) => {
       return DATASET_PROCESS_TYPES;
     }
 
-    getImputationResultPath() {
+    getImputationResultPath(isDataFile) {
       if (this.remotePath) {
         const pureFileName = this.remotePath
           .replace(/^.*[\\\/]/, "")
           .replace(/\.[^/.]+$/, "");
 
-        return `imputation/impute/${this.id}/${pureFileName}/result.json`;
+        if (isDataFile) {
+          return `imputation/impute/${this.id}/${pureFileName}/result.csv`;
+        } else {
+          return `imputation/impute/${this.id}/${pureFileName}/result.json`;
+        }
       }
 
       return null;
     }
 
-    getOutlierResultPath() {
+    getOutlierResultPath(isDataFile) {
       if (this.remotePath) {
         const pureFileName = this.remotePath
           .replace(/^.*[\\\/]/, "")
           .replace(/\.[^/.]+$/, "");
 
-        return `imputation/outlier/${this.id}/${pureFileName}/result.json`;
+        if (isDataFile) {
+          return `imputation/outlier/${this.id}/${pureFileName}/result.csv`;
+        } else {
+          return `imputation/outlier/${this.id}/${pureFileName}/result.json`;
+        }
       }
 
       return null;
@@ -67,6 +80,7 @@ module.exports = (sequelize, DataTypes) => {
   Dataset.init(
     {
       projectId: DataTypes.INTEGER,
+      taskId: DataTypes.INTEGER,
       name: DataTypes.STRING,
       contentType: DataTypes.STRING,
       fileSize: DataTypes.BIGINT,

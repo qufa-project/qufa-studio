@@ -4,6 +4,8 @@ module.exports = (sequelize, DataTypes) => {
   const TASK_STATUS = {
     init: { stat: "init", message: "요청중" },
     processing: { stat: "processing", message: "태스크 진행중" },
+    save_data: { stat: "save_data", message: "결과 데이터 저장중" },
+    profiling: { stat: "profiling", message: "프로파일링 진행중" },
     done: { stat: "done", message: "처리완료" },
     error: { stat: "error", message: "오류" },
   };
@@ -27,6 +29,8 @@ module.exports = (sequelize, DataTypes) => {
         as: "project",
         foreignKey: "project_id",
       });
+
+      this.hasOne(models.Dataset, { as: "dataset", foreignKey: "task_id" });
     }
 
     static get status() {
@@ -51,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       task: DataTypes.STRING,
       seq: DataTypes.INTEGER,
       status: DataTypes.STRING,
+      dataTable: DataTypes.STRING,
     },
     {
       sequelize,
