@@ -30,7 +30,7 @@ router.post("/", upload.single("file"), async function (req, res, next) {
 
     ChildProcessManager.runCsvParser(dataset, parseOption);
 
-    res.json({ id: dataset.id });
+    res.json({ projectId, id: dataset.id });
   } catch (err) {
     return next(err);
   }

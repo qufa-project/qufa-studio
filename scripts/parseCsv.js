@@ -54,42 +54,43 @@ async function run() {
     // await ImputationManager.runOutlier(dataset.remotePath);
 
     // mkfeat
+    // Feature
     console.log("MK feat start!");
-    const mkfeatUrl = config.mkfeat.url;
-    const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
-    const extractData = {
-      data: {
-        uri: `s3://qufa-test/${dataset.remotePath}`,
-        columns: dataset.metas.map((el) => {
-          return {
-            name: el.name,
-            type: el.colType,
-          };
-        }),
-      },
-      operator: [],
-    };
+    // const mkfeatUrl = config.mkfeat.url;
+    // const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
+    // const extractData = {
+    //   data: {
+    //     uri: `s3://qufa-test/${dataset.remotePath}`,
+    //     columns: dataset.metas.map((el) => {
+    //       return {
+    //         name: el.name,
+    //         type: el.colType,
+    //       };
+    //     }),
+    //   },
+    //   operator: [],
+    // };
 
-    const mkExtractCallBack = async (progress) => {
-      console.log(`Mkfeat progress: ${progress}`);
-      dataset.mkfeatProgress = progress;
-      await dataset.save();
-    };
+    // const mkExtractCallBack = async (progress) => {
+    //   console.log(`Mkfeat progress: ${progress}`);
+    //   dataset.mkfeatProgress = progress;
+    //   await dataset.save();
+    // };
 
-    const mkFeatures = await mkfeatManager.batchExtractJob(
-      extractData,
-      mkExtractCallBack
-    );
+    // const mkFeatures = await mkfeatManager.batchExtractJob(
+    //   extractData,
+    //   mkExtractCallBack
+    // );
 
-    const featuresForBulkInsert = mkFeatures.map((el) => {
-      return {
-        datasetId: dataset.id,
-        name: el.name,
-        colType: el.type,
-      };
-    });
+    // const featuresForBulkInsert = mkFeatures.map((el) => {
+    //   return {
+    //     datasetId: dataset.id,
+    //     name: el.name,
+    //     colType: el.type,
+    //   };
+    // });
 
-    await MkFeature.bulkCreate(featuresForBulkInsert);
+    // await MkFeature.bulkCreate(featuresForBulkInsert);
 
     // importance nxn matrix를 생성한다.
     console.log("Mk importance start!");

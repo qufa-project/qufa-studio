@@ -157,7 +157,7 @@ block scripts
             processData: false,
             success: function(d) {
               $(".loading").removeClass("active");
-              window.location.href = "/projects/" + d.id;
+              window.location.href = "/projects/" + d.projectId;
             }, error: function(err) {
               $(".loading").removeClass("active");
               alert("데이터를 등록 할 수 없습니다.")

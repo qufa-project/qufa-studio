@@ -159,6 +159,7 @@ $(document).ready(function () {
     for (var i = 1; i < results.length; i++) {
       var result = results[i];
       var profileColId = "profile-" + result.columnName;
+      console.log(profileColId);
 
       if (result.rowCnt == result.uniqueCnt) {
         var uniqueHtml = [];
