@@ -2,9 +2,10 @@
   a.btn-floating.btn-large.red
     i.large.material-icons settings
   ul
-    li
-      a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="태스크 정의")
-        i.material-icons account_tree
+    if !currentTask
+      li
+        a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="태스크 정의")
+          i.material-icons account_tree
     li
       a.btn-floating.yellow.darken-1.modal-trigger.tooltipped(href="#profile-modal" data-position="left" data-tooltip="프로파일링 상세결과")
         i.material-icons description

@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     processing: { stat: "processing", message: "태스크 진행중" },
     save_data: { stat: "save_data", message: "결과 데이터 저장중" },
     profiling: { stat: "profiling", message: "프로파일링 진행중" },
-    done: { stat: "done", message: "처리완료" },
+    importance: { stat: "importance", message: "중요도분석" },
+    done: { stat: "done", message: "완료" },
     error: { stat: "error", message: "오류" },
   };
 
@@ -47,6 +48,11 @@ module.exports = (sequelize, DataTypes) => {
 
     getTaskMsg() {
       return TASKS[this.task];
+    }
+
+    async setDone() {
+      this.status = TASK_STATUS.done.stat;
+      await this.save();
     }
   }
   Task.init(

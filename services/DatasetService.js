@@ -1,8 +1,29 @@
-const { Dataset, Meta } = require("../models");
+const { Project, Task, Dataset, Meta } = require("../models");
 
 const MetaManager = require("../lib/MetaManager");
+const ProjectService = require("./ProjectService");
 
 class DatasetService {
+  async find(id) {
+    return await Dataset.findByPk(id);
+  }
+
+  async findWithProjectTask(id) {
+    return await Dataset.findOne({
+      where: { id },
+      include: [
+        {
+          model: Project,
+          as: "project",
+        },
+        {
+          model: Task,
+          as: "task",
+        },
+      ],
+    });
+  }
+
   async findOriginByProject(projectId) {
     return await Dataset.findOne({
       where: {

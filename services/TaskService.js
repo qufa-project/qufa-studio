@@ -1,4 +1,4 @@
-const { Project, Task, Dataset } = require("../models");
+const { Project, Task, Dataset, Meta } = require("../models");
 
 const ProjectService = require("./ProjectService");
 const DatasetService = require("./DatasetService");
@@ -12,6 +12,26 @@ const projectService = new ProjectService();
 const datasetService = new DatasetService();
 
 class TaskService {
+  async findWithDataset(id) {
+    const task = await Task.findOne({
+      where: { id },
+      include: [
+        {
+          model: Dataset,
+          as: "dataset",
+          include: [
+            {
+              model: Meta,
+              as: "metas",
+            },
+          ],
+        },
+      ],
+    });
+
+    return task;
+  }
+
   async nextTask() {
     const task = await Task.findOne({
       where: {

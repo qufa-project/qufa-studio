@@ -8,6 +8,9 @@ var upload = multer({ storage: storage });
 
 const profileConfig = require("../configs/config").profiler;
 
+const DatasetService = require("../services/DatasetService");
+const datasetService = new DatasetService();
+
 const DatasetManager = require("../lib/DatasetManager");
 const FileManager = require("../lib/FileManager");
 const RawDataManager = require("../lib/RawDataManager");
@@ -47,7 +50,7 @@ router.get("/:id", async function (req, res, next) {
 });
 
 router.get("/:id/profile", async function (req, res, next) {
-  const dataset = await DatasetManager.find(req.params.id);
+  const dataset = await DatasetManager.findWithTask(req.params.id);
 
   try {
     const response = await axios.get(
@@ -62,6 +65,10 @@ router.get("/:id/profile", async function (req, res, next) {
     ) {
       dataset.hasProfile = true;
       await dataset.save();
+
+      if (dataset.task) {
+        await dataset.task.setDone();
+      }
     }
 
     res.json(response.data);
@@ -72,10 +79,16 @@ router.get("/:id/profile", async function (req, res, next) {
 });
 
 router.get("/:id/download", async function (req, res, next) {
-  const dataset = await DatasetManager.find(req.params.id);
+  const dataset = await datasetService.findWithProjectTask(req.params.id);
   const fileStream = FileManager.createReadStream(dataset.remotePath);
 
-  res.attachment(dataset.originFileName);
+  let fileName = dataset.project.title;
+  if (dataset.task) {
+    fileName = `${fileName}_${dataset.task.task}`;
+  }
+  fileName = `${fileName}.csv`;
+
+  res.attachment(fileName);
   fileStream.pipe(res);
 });
 

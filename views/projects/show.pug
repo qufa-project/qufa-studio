@@ -11,10 +11,10 @@ block content
       .col.s12
         ul.tabs
           li.tab
-            a.active(href='#tab-preview' data-tab='preview') 데이터 미리보기
+            a(class=(currentTask ? "" : "active") href=`/projects/${project.id}`) 원본데이터
           each task in project.tasks
             li.tab
-              a(href=`/projects/${project.id}/tasks/${task.task}`)=`${task.getTaskMsg()}(${task.getStatusMsg()})`
+              a(class=(currentTask && currentTask.id == task.id ? "active": "") href=`/projects/${project.id}/tasks/${task.id}`)=`${task.getTaskMsg()}(${task.getStatusMsg()})`
 
       #tab-preview.col.s12.table-responsive
         table.preview-table

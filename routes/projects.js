@@ -2,11 +2,13 @@ var express = require("express");
 var router = express.Router();
 
 const ProjectService = require("../services/ProjectService");
+const TaskService = require("../services/TaskService");
 
 const DataManager = require("../lib/DataManager");
 const RawDataManager = require("../lib/RawDataManager");
 
 const projectService = new ProjectService();
+const taskService = new TaskService();
 
 router.get("/", async function (req, res, next) {
   const options = {
@@ -52,7 +54,6 @@ router.get("/new", async function (req, res, next) {
 
 router.post("/:id/tasks", async function (req, res, next) {
   const project = await projectService.findWithTasks(req.params.id);
-  console.log(project);
   const taskList = req.body;
 
   if (taskList && taskList.length) {
@@ -61,6 +62,18 @@ router.post("/:id/tasks", async function (req, res, next) {
   } else {
     res.json({});
   }
+});
+
+router.get("/:id/tasks/:taskId", async function (req, res, next) {
+  const project = await projectService.findWithRelations(req.params.id);
+  const task = await taskService.findWithDataset(req.params.taskId);
+
+  res.render("projects/show", {
+    title: `QUFA - ${project.title}`,
+    project,
+    currentTask: task,
+    dataset: task.dataset,
+  });
 });
 
 router.get("/:id/back", async function (req, res, next) {
