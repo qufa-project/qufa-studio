@@ -1,7 +1,7 @@
 const urlHelper = require("./urlHelper");
-const formBytes = require("./formBytes");
+const formatBytes = require("./formatBytes");
 
 module.exports = {
   urlHelper,
-  formBytes,
+  formatBytes,
 };

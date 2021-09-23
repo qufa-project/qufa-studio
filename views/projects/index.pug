@@ -9,19 +9,32 @@ block content
             tr
               th ID
               th 프로젝트명
+              th 원천데이터
+              th Task
+              th
           tbody
             each project in projects.rows
               tr
                 td=project.id
                 td
                   a(href=`/projects/${project.id}`)=project.title
+                td
+                  if project.datasets.length
+                    - var dataset = project.datasets[0]
+                      p=`${dataset.originFileName} (${util.formatBytes(dataset.fileSize)})`
 
+                td.center-align=project.tasks.length
+                td.right-align
+                  a.waves-effect.waves-light.btn(href=`/projects/${project.id}`)
+                    | 프로젝트 상세
+
+    include ../fragments/_pagination
+    +pagination(pageOption)
 
     .col.s12.right-align
       a.waves-effect.waves-light.btn.modal-trigger(href='#new-project-modal')
         i.material-icons.left add
         | 신규 프로젝트 생성
-
 
   #new-project-modal.modal.modal-fixed-footer
     .modal-content

@@ -156,10 +156,9 @@ $(document).ready(function () {
   });
 
   function renderProfileChart(results) {
-    for (var i = 1; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       var result = results[i];
       var profileColId = "profile-" + result.columnName;
-      console.log(profileColId);
 
       if (result.rowCnt == result.uniqueCnt) {
         var uniqueHtml = [];

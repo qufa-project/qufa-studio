@@ -1,3 +1,5 @@
+const { Sequelize } = require("sequelize");
+
 const { Project, Dataset, Meta, Task } = require("../models");
 
 const DATA_DEFAULT_PER_PAGE = 10;
@@ -134,6 +136,19 @@ class ProjectService {
 
       try {
         const projects = await Project.findAndCountAll({
+          include: [
+            {
+              model: Task,
+              as: "tasks",
+              attributes: ["id"],
+            },
+            {
+              model: Dataset,
+              as: "datasets",
+              required: false,
+              where: { processType: "origin" },
+            },
+          ],
           offset: offset,
           limit: options.perPage,
           order: [["id", "DESC"]],

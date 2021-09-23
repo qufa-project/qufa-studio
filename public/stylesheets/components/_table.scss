@@ -1,0 +1,10 @@
+.table-responsive {
+  > table {
+    tr {
+      th,
+      td {
+        padding: 8px 16px;
+      }
+    }
+  }
+}

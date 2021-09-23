@@ -19,7 +19,17 @@ router.get("/", async function (req, res, next) {
   };
 
   const projects = await projectService.findAll(options);
-  res.render("projects/index", { title: "QUFA 프로젝트 목록", projects });
+
+  options.currentPage = parseInt(options.currentPage);
+  options.path = "/projects";
+  options.query = req.query;
+  options.total = Math.ceil(projects.count / options.perPage);
+
+  res.render("projects/index", {
+    title: "QUFA 프로젝트 목록",
+    projects,
+    pageOption: options,
+  });
 });
 
 router.get("/:id", async function (req, res, next) {
