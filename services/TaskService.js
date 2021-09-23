@@ -7,6 +7,7 @@ const DatasetService = require("./DatasetService");
 
 const DatasetManager = require("../lib/DatasetManager");
 const FileManager = require("../lib/FileManager");
+const MetaManager = require("../lib/MetaManager");
 const ImputationManager = require("../lib/ImputationManager");
 const ProfileManager = require("../lib/ProfileManager");
 const ChildProcessManager = require("../lib/ChildProcessManager");
@@ -112,11 +113,10 @@ class TaskService {
 
           const mkExtractCallBack = async (progress) => {
             console.log(`Mkfeat progress: ${progress}`);
-            dataset.mkfeatProgress = progress;
-            await dataset.save();
           };
 
           const mkFeatures = await mkfeatManager.batchExtractJob(
+            dataset,
             extractData,
             mkExtractCallBack
           );
@@ -171,30 +171,41 @@ class TaskService {
           break;
         case "feature":
           isOriginScheme = false;
+          taskFilePath = originDataset.getFeaturePath();
           break;
       }
 
       try {
+        const s3Meta = await FileManager.findS3Meta(taskFilePath);
+
+        dataset.name = taskFilePath;
+        dataset.contentType = originDataset.contentType;
+        dataset.fileSize = s3Meta.ContentLength;
+        dataset.remotePath = taskFilePath;
+        dataset.status = Dataset.status.init.stat;
+        dataset.processType = task.task;
+        dataset.dataTable = await DatasetManager.genTableName();
+        await dataset.save();
+
         if (isOriginScheme) {
-          const s3Meta = await FileManager.findS3Meta(taskFilePath);
-
-          dataset.name = taskFilePath;
-          dataset.contentType = originDataset.contentType;
-          dataset.fileSize = s3Meta.ContentLength;
-          dataset.remotePath = taskFilePath;
-          dataset.status = Dataset.status.init.stat;
-          dataset.processType = task.task;
-          dataset.dataTable = await DatasetManager.genTableName();
-          await dataset.save();
-
           await datasetService.cloneMeta(originDataset.id, dataset.id);
-
-          ChildProcessManager.runS3CsvParser(dataset, {});
+        } else {
+          console.log(dataset.remotePath);
+          const encoding = await MetaManager.detectEncoding(dataset.remotePath);
+          console.log(encoding);
+          const records = await MetaManager.parseRecord(dataset, {
+            encoding,
+          });
+          const metas = MetaManager.extractMeta(records, 1);
+          console.log(metas);
+          await datasetService.createMetas(dataset, metas);
         }
+        ChildProcessManager.runS3CsvParser(dataset, {});
 
         task.status = Task.status.save_data.stat;
         await task.save();
       } catch (err) {
+        console.error("runPostTask Exception >>>>>>>>>>>>>>>>>>>>>>>>");
         console.error(err);
       }
 

@@ -239,7 +239,7 @@ $(document).ready(function () {
         stringHtml.push(result.duplicateCnt.toLocaleString());
         stringHtml.push(" </span>");
         stringHtml.push(" </div>");
-        numberHtml.push("</div>");
+        stringHtml.push("</div>");
 
         $("#" + profileColId).html(stringHtml.join(""));
       }

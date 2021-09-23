@@ -60,6 +60,16 @@ class DatasetService {
 
     return target;
   }
+
+  async createMetas(dataset, metas) {
+    for (const meta of metas) {
+      meta.datasetId = dataset.id;
+    }
+
+    await MetaManager.createAll(dataset, metas);
+
+    return true;
+  }
 }
 
 module.exports = DatasetService;

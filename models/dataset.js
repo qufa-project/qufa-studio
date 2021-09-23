@@ -45,6 +45,20 @@ module.exports = (sequelize, DataTypes) => {
       return DATASET_PROCESS_TYPES;
     }
 
+    getFeatureUrl() {
+      return `s3://qufa-test/${this.getFeaturePath()}`;
+    }
+
+    getFeaturePath() {
+      if (this.remotePath) {
+        const pureFileName = this.remotePath
+          .replace(/^.*[\\\/]/, "")
+          .replace(/\.[^/.]+$/, "");
+
+        return `mkfeat/feature/${this.id}/${pureFileName}_feature.csv`;
+      }
+    }
+
     getImputationResultPath(isDataFile) {
       if (this.remotePath) {
         const pureFileName = this.remotePath
