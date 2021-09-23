@@ -35,7 +35,7 @@ async function run() {
 
     const rows = await MetaManager.parseRecord(dataset, option);
     try {
-      await RawDataManager.insertData(dataset, rows);
+      await RawDataManager.insertData(dataset, rows.slice(1));
       dataset.status = Dataset.status.done.stat;
       await dataset.save();
     } catch (error) {
