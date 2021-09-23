@@ -57,32 +57,32 @@ $(document).ready(function () {
           dataRows = d.results.rows;
           var rowsHtml = rowsTemplate(d.results.rows);
           $("#rows").html(rowsHtml);
-        }
 
-        totalRows = d.results.count.cnt;
+          totalRows = d.results.count.cnt;
 
-        var pageInfo = {
-          currentPage: searchOption.currentPage,
-          total: Math.ceil(totalRows / searchOption.perPage),
-          pages: [],
-        };
+          var pageInfo = {
+            currentPage: searchOption.currentPage,
+            total: Math.ceil(totalRows / searchOption.perPage),
+            pages: [],
+          };
 
-        for (
-          var i = pageInfo.currentPage - 3;
-          i <= pageInfo.currentPage + 3;
-          ++i
-        ) {
-          if (i > 0) {
-            pageInfo.pages.push(i);
+          for (
+            var i = pageInfo.currentPage - 3;
+            i <= pageInfo.currentPage + 3;
+            ++i
+          ) {
+            if (i > 0) {
+              pageInfo.pages.push(i);
+            }
           }
+
+          var paginationHtml = pageTemplate(pageInfo);
+          $("#rows-pagination").html(paginationHtml);
+
+          $(".loading").removeClass("active");
+
+          renderProfileResult();
         }
-
-        var paginationHtml = pageTemplate(pageInfo);
-        $("#rows-pagination").html(paginationHtml);
-
-        $(".loading").removeClass("active");
-
-        renderProfileResult();
       });
     } else {
       $(".loading").removeClass("active");

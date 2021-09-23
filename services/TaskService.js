@@ -8,6 +8,7 @@ const DatasetService = require("./DatasetService");
 const DatasetManager = require("../lib/DatasetManager");
 const FileManager = require("../lib/FileManager");
 const ImputationManager = require("../lib/ImputationManager");
+const ProfileManager = require("../lib/ProfileManager");
 const ChildProcessManager = require("../lib/ChildProcessManager");
 
 const MkfeatManager = require("../lib/MkfeatManager");
@@ -201,6 +202,40 @@ class TaskService {
     } else {
       return null;
     }
+  }
+
+  async checkProfiling() {
+    const task = await Task.findOne({
+      where: { status: Task.status.profiling.stat },
+      include: [
+        {
+          model: Dataset,
+          as: "dataset",
+          required: true,
+        },
+      ],
+    });
+
+    if (task && task.dataset) {
+      const dataset = task.dataset;
+
+      try {
+        const profileResult = await ProfileManager.findProfileResult(dataset);
+        if (profileResult && profileResult.status == "success") {
+          dataset.hasProfile = true;
+          await dataset.save();
+
+          await task.setDone();
+
+          return task;
+        }
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    return null;
   }
 }
 

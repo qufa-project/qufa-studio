@@ -112,7 +112,7 @@ app.use(function (err, req, res, next) {
 cron.schedule("*/10 * * * * *", async () => {
   console.log("check task ===================================");
   try {
-    await taskService.runTask();
+    //await taskService.runTask();
   } catch (err) {
     console.log(err);
   }
@@ -122,7 +122,17 @@ cron.schedule("*/10 * * * * *", async () => {
 cron.schedule("*/10 * * * * *", async () => {
   console.log("check post task ===================================");
   try {
-    await taskService.runPostTask();
+    //await taskService.runPostTask();
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// Task 완료에 따른 데이터 후처리
+cron.schedule("*/10 * * * * *", async () => {
+  console.log("check profiling task ===================================");
+  try {
+    await taskService.checkProfiling();
   } catch (err) {
     console.log(err);
   }

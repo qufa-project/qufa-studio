@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     originDataset(models) {
       // TODO: Dataset에 정의된 constant 활용
       return this.datasets.find((dataset) => {
-        return dataset.processType === "origin" && dataset.status == "done";
+        return dataset.processType === "origin";
       });
     }
   }
