@@ -1,4 +1,5 @@
 const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 
 const { Project, Dataset, Meta, Task } = require("../models");
 
@@ -155,6 +156,53 @@ class ProjectService {
         });
 
         resolve(projects);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
+  findAllByGroup = (options) => {
+    return new Promise(async (resolve, reject) => {
+      options.perPage = options.perPage || DATA_DEFAULT_PER_PAGE;
+
+      const offset = (options.currentPage - 1) * options.perPage;
+
+      try {
+        const count = await Project.count({
+          where: {
+            group_id:{
+              [Op.eq]: options.groupId
+            }
+          }
+        })
+        const projects = await Project.findAll({
+          include: [
+            {
+              model: Task,
+              as: "tasks",
+              attributes: ["id"],
+            },
+            {
+              model: Dataset,
+              as: "datasets",
+              required: false,
+              where: { processType: "origin" },
+            },
+          ],
+          offset: offset,
+          limit: options.perPage,
+          order: [["id", "DESC"]],
+          where: {
+            group_id:{
+              [Op.eq]: options.groupId
+            }
+          }
+        });
+        resolve({
+          count: count,
+          rows: projects
+        });
       } catch (err) {
         reject(err);
       }

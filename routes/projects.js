@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const auth = require('../utils/auth')
 
 const ProjectService = require("../services/ProjectService");
 const TaskService = require("../services/TaskService");
@@ -10,16 +11,16 @@ const RawDataManager = require("../lib/RawDataManager");
 const projectService = new ProjectService();
 const taskService = new TaskService();
 
-router.get("/", async function (req, res, next) {
+router.get("/", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const options = {
     currentPage: req.query.currentPage || 1,
     perPage: req.query.perPage || 10,
     sortCol: req.query.sortCol || "id",
     sortDir: req.query.sortDir || "DESC",
+    groupId: req.user.group.id
   };
 
-  const projects = await projectService.findAll(options);
-
+  const projects = await projectService.findAllByGroup(options)
   options.currentPage = parseInt(options.currentPage);
   options.path = "/projects";
   options.query = req.query;
@@ -32,7 +33,7 @@ router.get("/", async function (req, res, next) {
   });
 });
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", auth.checkAuth, auth.checkRole(1),async function (req, res, next) {
   const project = await projectService.findWithRelations(req.params.id);
   const dataset = project.originDataset();
 
@@ -43,7 +44,7 @@ router.get("/:id", async function (req, res, next) {
   });
 });
 
-router.post("/", async function (req, res, next) {
+router.post("/", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const project = await projectService.create(req.body);
   if (project && project.id) {
     res.redirect(301, `/projects/${project.id}/init`);
@@ -52,17 +53,17 @@ router.post("/", async function (req, res, next) {
   res.render("projects/error", { title: "QUFA 프로젝트 오류", project });
 });
 
-router.get("/:id/init", async function (req, res, next) {
+router.get("/:id/init", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const project = await projectService.find(req.params.id);
   res.render("projects/init", { title: "QUFA 프로젝트 데이터 등록", project });
 });
 
-router.get("/new", async function (req, res, next) {
+router.get("/new", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const project = await projectService.findWithDatasets(req.params.id);
   res.render("projects/new", { title: "QUFA 프로젝트 등록" });
 });
 
-router.post("/:id/tasks", async function (req, res, next) {
+router.post("/:id/tasks", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const project = await projectService.findWithTasks(req.params.id);
   const taskList = req.body;
 
@@ -74,7 +75,7 @@ router.post("/:id/tasks", async function (req, res, next) {
   }
 });
 
-router.get("/:id/tasks/:taskId", async function (req, res, next) {
+router.get("/:id/tasks/:taskId", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const project = await projectService.findWithRelations(req.params.id);
   const task = await taskService.findWithDataset(req.params.taskId);
 
@@ -86,7 +87,7 @@ router.get("/:id/tasks/:taskId", async function (req, res, next) {
   });
 });
 
-router.get("/:id/back", async function (req, res, next) {
+router.get("/:id/back", auth.checkAuth, auth.checkRole(1), async function (req, res, next) {
   const data = await DataManager.findWithMeta(req.params.id);
   res.render("projects/show", { title: "QUFA 프로젝트 등록", data });
 });

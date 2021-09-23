@@ -1,6 +1,7 @@
 var express = require("express");
 const passport = require("passport");
 var router = express.Router();
+const auth = require('../utils/auth')
 
 const DataManager = require("../lib/DataManager");
 
@@ -17,7 +18,7 @@ const formatBytes = function (bytes, decimals = 2) {
 };
 
 /* GET home page. */
-router.get("/", async function (req, res, next) {
+router.get("/", auth.checkAuth, async function (req, res, next) {
   const pageOption = {
     currentPage: req.query.currentPage || 1,
     perPage: req.query.perPage,
