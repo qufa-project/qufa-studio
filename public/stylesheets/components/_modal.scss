@@ -1,5 +1,12 @@
 $dark-grey: #25262c;
 
+.modal {
+  &.lg {
+    width: 90%;
+    max-height: 80%;
+  }
+}
+
 .modal-content {
   background-color: $dark-grey;
 

@@ -56,3 +56,10 @@ Handlebars.registerHelper("fixFloat", function (distance, f) {
 Handlebars.registerHelper("findByIndex", function (list, idx) {
   return list[idx];
 });
+
+Handlebars.registerHelper("isEmpty", function (value, options) {
+  if (Object.keys(value).length > 0) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});

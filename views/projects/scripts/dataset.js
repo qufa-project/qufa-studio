@@ -301,4 +301,119 @@ $(document).ready(function () {
       columnTemplate.strokeOpacity = 0.3;
     });
   }
+
+  var dimReductionData = null;
+  $(document).on("click", ".visual-btn", function (e) {
+    console.log("click visual btn");
+
+    if (taskId) {
+      if (task == "dimReduction") {
+        if (!dimReductionData) {
+          var searchOption = {
+            currentPage: 1,
+            perPage: totalRows,
+          };
+          $.getJSON("/datasets/" + datasestId, searchOption, function (d) {
+            if (d && d.results) {
+              dimReductionData = d.results.rows;
+            }
+
+            renderDimReduction();
+          });
+        } else {
+          renderDimReduction();
+        }
+      }
+    }
+  });
+
+  function renderDimReduction() {
+    var chart = am4core.create("visual-result", am4charts.XYChart);
+
+    var valueAxisX = chart.xAxes.push(new am4charts.ValueAxis());
+    valueAxisX.renderer.ticks.template.disabled = true;
+    valueAxisX.renderer.axisFills.template.disabled = true;
+
+    var valueAxisY = chart.yAxes.push(new am4charts.ValueAxis());
+    valueAxisY.renderer.ticks.template.disabled = true;
+    valueAxisY.renderer.axisFills.template.disabled = true;
+
+    var series = chart.series.push(new am4charts.LineSeries());
+    series.dataFields.valueX = "x";
+    series.dataFields.valueY = "y";
+    series.dataFields.value = "value";
+    series.strokeOpacity = 0;
+    series.sequencedInterpolation = true;
+    series.tooltip.pointerOrientation = "vertical";
+
+    var bullet = series.bullets.push(new am4core.Circle());
+    bullet.fill = am4core.color("#ff0000");
+    bullet.propertyFields.fill = "color";
+    bullet.strokeOpacity = 1;
+    bullet.strokeWidth = 1;
+    bullet.fillOpacity = 1;
+    bullet.stroke = am4core.color("#ffffff");
+    bullet.hiddenState.properties.opacity = 0;
+    bullet.tooltipText = "";
+
+    var outline = chart.plotContainer.createChild(am4core.Circle);
+    outline.fillOpacity = 1;
+    outline.strokeOpacity = 1;
+    outline.stroke = am4core.color("#ff0000");
+    outline.strokeWidth = 2;
+    outline.hide(0);
+
+    var blurFilter = new am4core.BlurFilter();
+    outline.filters.push(blurFilter);
+
+    bullet.events.on("over", function (event) {
+      var target = event.target;
+      outline.radius = target.pixelRadius + 2;
+      outline.x = target.pixelX;
+      outline.y = target.pixelY;
+      outline.show();
+    });
+
+    bullet.events.on("out", function (event) {
+      outline.hide();
+    });
+
+    var hoverState = bullet.states.create("hover");
+    hoverState.properties.fillOpacity = 1;
+    hoverState.properties.strokeOpacity = 1;
+
+    series.heatRules.push({
+      target: bullet,
+      min: 4,
+      max: 8,
+      property: "radius",
+    });
+
+    bullet.adapter.add("tooltipY", function (tooltipY, target) {
+      return -target.radius;
+    });
+
+    chart.cursor = new am4charts.XYCursor();
+    chart.cursor.behavior = "zoomXY";
+    chart.cursor.snapToSeries = series;
+
+    chart.data = [];
+    for (var row of dimReductionData) {
+      var color = "#eea638";
+      if (row[5] == "1") {
+        color = "#86a965";
+      }
+
+      chart.data.push({
+        x: row[1],
+        y: row[2],
+        category: row[5],
+        value: 0.2,
+        color: color,
+      });
+    }
+
+    $("#visual-modal").modal();
+    $("#visual-modal").modal("open");
+  }
 });

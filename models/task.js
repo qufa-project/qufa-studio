@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     imputation: "결측치 보완",
     feature: "특징추출",
     fairness: "공정성",
+    dimReduction: "차원축소",
   };
 
   class Task extends Model {

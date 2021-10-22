@@ -90,6 +90,16 @@ module.exports = (sequelize, DataTypes) => {
 
       return null;
     }
+
+    getDimResuctionPath() {
+      if (this.remotePath) {
+        const pureFileName = this.remotePath
+          .replace(/^.*[\\\/]/, "")
+          .replace(/\.[^/.]+$/, "");
+
+        return `fairness/dimReduction/${this.id}/${pureFileName}.csv`;
+      }
+    }
   }
   Dataset.init(
     {

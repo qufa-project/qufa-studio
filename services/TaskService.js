@@ -10,6 +10,7 @@ const FileManager = require("../lib/FileManager");
 const MetaManager = require("../lib/MetaManager");
 const ImputationManager = require("../lib/ImputationManager");
 const ProfileManager = require("../lib/ProfileManager");
+const DimReductionManager = require("../lib/DimReductionManager");
 const ChildProcessManager = require("../lib/ChildProcessManager");
 
 const MkfeatManager = require("../lib/MkfeatManager");
@@ -97,6 +98,9 @@ class TaskService {
         case "imputation":
           await ImputationManager.runImputation(dataset.remotePath);
           break;
+        case "dimReduction":
+          await DimReductionManager.runDimReduction(dataset.remotePath);
+          break;
         case "feature":
           const extractData = {
             data: {
@@ -173,6 +177,10 @@ class TaskService {
           isOriginScheme = false;
           taskFilePath = originDataset.getFeaturePath();
           break;
+        case "dimReduction":
+          isOriginScheme = false;
+          taskFilePath = originDataset.getDimResuctionPath();
+          break;
       }
 
       try {
@@ -190,14 +198,11 @@ class TaskService {
         if (isOriginScheme) {
           await datasetService.cloneMeta(originDataset.id, dataset.id);
         } else {
-          console.log(dataset.remotePath);
           const encoding = await MetaManager.detectEncoding(dataset.remotePath);
-          console.log(encoding);
           const records = await MetaManager.parseRecord(dataset, {
             encoding,
           });
           const metas = MetaManager.extractMeta(records, 1);
-          console.log(metas);
           await datasetService.createMetas(dataset, metas);
         }
         ChildProcessManager.runS3CsvParser(dataset, {});

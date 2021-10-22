@@ -29,6 +29,9 @@ block content
                   br
                   small
                     | #{meta.colType}
+                  br
+                  small
+                    | #{meta.koName}
             tr
               each meta in dataset.metas
                 th.num-chart-wrap
@@ -39,6 +42,7 @@ block content
 
   include _option_btns
   include _task_modal
+  include _visual_modal
   include _profile_modal
 
 block scripts
@@ -52,6 +56,9 @@ block scripts
     am4core.addLicense("CH204832145");
   script
     | var datasestId = #{dataset.id};
+    if currentTask
+      | var taskId = #{currentTask.id};
+      | var task = "#{currentTask.task}";
     include scripts/dataset.js
   script.
     var projectId = #{project.id};

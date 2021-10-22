@@ -3,7 +3,9 @@
   {{#each @this}}
   {{#ifCond @index ">" 0}}
   <td>
-    {{@this}}
+    {{#isEmpty @this}}
+      {{@this}}
+    {{/isEmpty}}
   </td>
   {{/ifCond}}
   {{/each}}
