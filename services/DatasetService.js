@@ -30,6 +30,26 @@ class DatasetService {
         projectId,
         processType: Dataset.processTypes.origin,
       },
+      include: [
+        {
+          model: Meta,
+          as: "metas",
+        },
+      ],
+    });
+  }
+
+  async findByTaskId(taskId) {
+    return await Dataset.findOne({
+      where: {
+        taskId,
+      },
+      include: [
+        {
+          model: Meta,
+          as: "metas",
+        },
+      ],
     });
   }
 

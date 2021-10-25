@@ -59,6 +59,18 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
+    getResultJson() {
+      if (this.remotePath) {
+        let pos = this.remotePath.lastIndexOf(".");
+        return (
+          this.remotePath.substr(0, pos < 0 ? this.remotePath.length : pos) +
+          ".json"
+        );
+      }
+
+      return null;
+    }
+
     getImputationResultPath(isDataFile) {
       if (this.remotePath) {
         const pureFileName = this.remotePath

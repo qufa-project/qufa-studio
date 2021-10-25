@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       return TASKS;
     }
 
+    isSaveData() {
+      return ["profiling", "importance", "done"].indexOf(this.status) > 0;
+    }
+
     getStatusMsg() {
       return TASK_STATUS[this.status].message;
     }

@@ -93,16 +93,16 @@ router.get("/:id/download", async function (req, res, next) {
 });
 
 router.get("/:id/features", async function (req, res, next) {
-  const data = await DataManager.findWithFeatures(req.params.id);
+  const data = await DatasetManager.findWithFeatures(req.params.id);
   res.json(data.features);
 });
 
 router.get("/:id/imputation", async function (req, res, next) {
-  const data = await DataManager.find(req.params.id);
+  const data = await DatasetManager.find(req.params.id);
 
   try {
-    const s3Obj = await FileManager.findS3Objct(data.getImputationResultPath());
-    console.log(data.getImputationResultPath());
+    console.log(data.getResultJson());
+    const s3Obj = await FileManager.findS3Objct(data.getResultJson());
     res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
   } catch (err) {
     console.log(err);
@@ -111,7 +111,7 @@ router.get("/:id/imputation", async function (req, res, next) {
 });
 
 router.get("/:id/outlier", async function (req, res, next) {
-  const data = await DataManager.find(req.params.id);
+  const data = await DatasetManager.find(req.params.id);
 
   try {
     const s3Obj = await FileManager.findS3Objct(data.getOutlierResultPath());
@@ -123,8 +123,16 @@ router.get("/:id/outlier", async function (req, res, next) {
 });
 
 router.get("/:id/importance", async function (req, res, next) {
-  const data = await DataManager.findWithImportance(req.params.id);
+  const data = await DatasetManager.findWithImportance(req.params.id);
   res.json(data);
+});
+
+router.post("/originByProject", async function (req, res, next) {
+  const projectId = req.body.projectId;
+  const dataset = await datasetService.findOriginByProject(projectId);
+
+  const results = await RawDataManager.searchByIds(dataset, req.body.dataIds);
+  res.json(results);
 });
 
 module.exports = router;

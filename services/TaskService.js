@@ -72,23 +72,51 @@ class TaskService {
     return nextTask;
   }
 
+  async prevTask(projectId, seq) {
+    const prevTask = await Task.findOne({
+      where: {
+        projectId,
+        seq,
+      },
+      order: ["seq"],
+    });
+
+    return prevTask;
+  }
+
   async runTask() {
     const nextTask = await this.nextTask();
     if (nextTask) {
       nextTask.status = Task.status.processing.stat;
 
+      let dataset = null;
+      dataset = await datasetService.findOriginByProject(nextTask.projectId);
+      /*
+      if (nextTask.seq == 1) {
+        dataset = await datasetService.findOriginByProject(nextTask.projectId);
+      } else {
+        const prevTask = await this.prevTask(
+          nextTask.projectId,
+          nextTask.seq - 1
+        );
+
+        if (prevTask.isSaveData()) {
+          dataset = await datasetService.findByTaskId(prevTask.id);
+        }
+      }
+      */
+
+      if (!dataset) {
+        // task 작업은 선행 작업의 결과물을 바탕으로 수행. 선행작업의 데이터가 존재하지 않을경우 이후 작업은 무시됨
+        return false;
+      }
+
       const taskDataset = await Dataset.create({
         projectId: nextTask.projectId,
         taskId: nextTask.id,
       });
-
       await nextTask.save();
 
-      const project = await projectService.findWithOriginDataset(
-        nextTask.projectId
-      );
-
-      const dataset = project.datasets[0];
       const taskName = nextTask.task;
 
       switch (taskName) {

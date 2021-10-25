@@ -82,6 +82,47 @@ $(document).ready(function () {
           $(".loading").removeClass("active");
 
           renderProfileResult();
+
+          if (task && task == "imputation") {
+            var dataIds = [];
+            for (var row of dataRows) {
+              dataIds.push(row[0]);
+            }
+
+            $.ajax({
+              url: "/datasets/originByProject",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({
+                projectId: projectId,
+                dataIds: dataIds,
+              }),
+              success: function (d) {
+                if (d && d.rows) {
+                  var dataLength = d.rows.length;
+                  for (var i = 0; i < dataLength; i++) {
+                    var origin = dataRows[i];
+                    var imputed = d.rows[i];
+
+                    for (var j = 0; j < origin.length; j++) {
+                      if (origin[j] != imputed[j]) {
+                        $(
+                          ".data-row[data-id='" +
+                            origin[0] +
+                            "'] td:nth-child(" +
+                            j +
+                            ")"
+                        ).addClass("teal");
+                      }
+                    }
+                  }
+                }
+              },
+              error: function (err) {
+                console.log(err);
+              },
+            });
+          }
         }
       });
     } else {
@@ -303,29 +344,7 @@ $(document).ready(function () {
   }
 
   var dimReductionData = null;
-  $(document).on("click", ".visual-btn", function (e) {
-    console.log("click visual btn");
-
-    if (taskId) {
-      if (task == "dimReduction") {
-        if (!dimReductionData) {
-          var searchOption = {
-            currentPage: 1,
-            perPage: totalRows,
-          };
-          $.getJSON("/datasets/" + datasestId, searchOption, function (d) {
-            if (d && d.results) {
-              dimReductionData = d.results.rows;
-            }
-
-            renderDimReduction();
-          });
-        } else {
-          renderDimReduction();
-        }
-      }
-    }
-  });
+  $(document).on("click", ".visual-btn", function (e) {});
 
   function renderDimReduction() {
     var chart = am4core.create("visual-result", am4charts.XYChart);

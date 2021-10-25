@@ -1,0 +1,37 @@
+.row
+  .col.s12
+    h4.title=project.title
+    p=project.description
+
+if dataset
+  .row
+    .col.s12
+      ul.tabs
+        li.tab
+          a(class=(currentTask ? "" : "active") href=`/projects/${project.id}`) 원본데이터
+        each task in project.tasks
+          li.tab
+            a(class=(currentTask && currentTask.id == task.id ? "active": "") href=`/projects/${project.id}/tasks/${task.id}`)=`${task.getTaskMsg()}(${task.getStatusMsg()})`
+
+    #tab-preview.col.s12.table-responsive
+      table.preview-table
+        thead
+          tr
+            each meta, index in dataset.metas
+              th.min.col-header(data-col=meta.name)
+                a.filter-btn(href='#' data-col=meta.name data-idx=index)
+                  span.material-icons sort
+  
+                | #{meta.name}
+                br
+                small
+                  | #{meta.colType}
+                br
+                small
+                  | #{meta.koName}
+          tr
+            each meta in dataset.metas
+              th.num-chart-wrap
+                .num-chart(id="profile-" + meta.name)
+        tbody#rows
+      #rows-pagination

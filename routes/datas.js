@@ -13,6 +13,9 @@ var FileManager = require("../lib/FileManager");
 var MetaManager = require("../lib/MetaManager");
 var RawDataManager = require("../lib/RawDataManager");
 
+const DatasetService = require("../services/DatasetService");
+const datasetService = new DatasetService();
+
 const child_process = require("child_process");
 
 /**
@@ -150,7 +153,7 @@ router.post("/", upload.single("file"), async function (req, res, next) {
     });
     res.json({ id: data.id });
   } catch (err) {
-    return next(err)
+    return next(err);
   }
 });
 
