@@ -7,6 +7,7 @@ block content
   include _task_modal
   include _visual_modal
   include _profile_modal
+  include _importance_modal
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
@@ -18,7 +19,7 @@ block scripts
   script.
     am4core.addLicense("CH204832145");
   script
-    | var datasestId = #{dataset.id};
+    | var datasetId = #{dataset.id};
     if currentTask
       | var taskId = #{currentTask.id};
       | var task = "#{currentTask.task}";

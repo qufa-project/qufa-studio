@@ -35,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       this.hasMany(models.Meta, { as: "metas", foreignKey: "dataset_id" });
+      this.hasMany(models.MkFeature, {
+        as: "features",
+        foreignKey: "dataset_id",
+      });
     }
 
     static get status() {

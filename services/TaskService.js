@@ -142,6 +142,7 @@ class TaskService {
             },
             operator: [],
           };
+          console.log(extractData);
 
           const mkExtractCallBack = async (progress) => {
             console.log(`Mkfeat progress: ${progress}`);
@@ -239,7 +240,7 @@ class TaskService {
         await task.save();
       } catch (err) {
         console.error("runPostTask Exception >>>>>>>>>>>>>>>>>>>>>>>>");
-        console.error(err);
+        // console.error(err);
       }
 
       return task;

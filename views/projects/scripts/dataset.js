@@ -49,7 +49,7 @@ $(document).ready(function () {
     $(".data-filter-box").hide();
 
     if (!dataRows || isForced) {
-      $.getJSON("/datasets/" + datasestId, searchOption, function (d) {
+      $.getJSON("/datasets/" + datasetId, searchOption, function (d) {
         var metaHtml = metaTemplate(d.dataset.metas);
         $("#meta-wrap").html(metaHtml);
 
@@ -133,7 +133,7 @@ $(document).ready(function () {
   var profileResult;
   function renderProfileResult() {
     if (!profileResult) {
-      $.getJSON("/datasets/" + datasestId + "/profile", function (d) {
+      $.getJSON("/datasets/" + datasetId + "/profile", function (d) {
         if (d && d.status == "success") {
           profileResult = d.results;
 
@@ -194,6 +194,41 @@ $(document).ready(function () {
 
   $(document).on("click", ".cancel-filter-btn", function (e) {
     $(".data-filter-box").hide();
+  });
+
+  var importanceResult = null;
+  $(document).on("click", ".importance-btn", function (e) {
+    $.getJSON("/datasets/" + datasetId + "/importance", function (result) {
+      if (result && result.metas) {
+        importanceResult = result.metas;
+
+        var metaMap = {};
+        var chartData = [];
+        for (var r of importanceResult) {
+          metaMap[r.id] = { name: r.name, koName: r.koName };
+          chartData.push({
+            base: r.name,
+            target: r.name,
+            value: 0,
+          });
+        }
+
+        for (var r of importanceResult) {
+          if (r.targets && r.targets.length) {
+            for (var target of r.targets) {
+              chartData.push({
+                base: metaMap[r.id].name,
+                target: metaMap[target.featureId].name,
+                value: Math.ceil(target.importance * 100),
+              });
+            }
+          }
+        }
+
+        $("#importance-result").html("");
+        renderImportanceChart("importance-result", chartData);
+      }
+    });
   });
 
   function renderProfileChart(results) {
@@ -341,6 +376,91 @@ $(document).ready(function () {
       columnTemplate.strokeWidth = 1;
       columnTemplate.strokeOpacity = 0.3;
     });
+  }
+
+  function renderImportanceChart(chartId, data) {
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+
+    var chart = am4core.create(chartId, am4charts.XYChart);
+    chart.maskBullets = false;
+    chart.data = data;
+
+    var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+
+    xAxis.dataFields.category = "base";
+    yAxis.dataFields.category = "target";
+
+    xAxis.renderer.grid.template.disabled = true;
+    xAxis.renderer.minGridDistance = 40;
+    xAxis.renderer.labels.template.rotation = 30;
+
+    yAxis.renderer.grid.template.disabled = true;
+    yAxis.renderer.inversed = true;
+    yAxis.renderer.minGridDistance = 30;
+
+    xAxis.renderer.labels.template.fill = am4core.color("#fff");
+
+    yAxis.renderer.labels.template.fill = am4core.color("#fff");
+
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.dataFields.categoryX = "base";
+    series.dataFields.categoryY = "target";
+    series.dataFields.value = "value";
+    series.sequencedInterpolation = true;
+    series.defaultState.transitionDuration = 3000;
+
+    var bgColor = new am4core.InterfaceColorSet().getFor("background");
+
+    var columnTemplate = series.columns.template;
+    columnTemplate.strokeWidth = 1;
+    columnTemplate.strokeOpacity = 0.2;
+    columnTemplate.stroke = bgColor;
+    columnTemplate.tooltipText =
+      "{base}, {target}: {value.workingValue.formatNumber('#.')}%";
+    columnTemplate.width = am4core.percent(100);
+    columnTemplate.height = am4core.percent(100);
+
+    series.heatRules.push({
+      target: columnTemplate,
+      property: "fill",
+      min: am4core.color("#fff"),
+      max: am4core.color("#4db6ac"),
+    });
+
+    // heat legend
+    var heatLegend = chart.bottomAxesContainer.createChild(
+      am4charts.HeatLegend
+    );
+    heatLegend.width = am4core.percent(100);
+    heatLegend.series = series;
+    heatLegend.valueAxis.renderer.labels.template.fontSize = 9;
+    heatLegend.valueAxis.renderer.minGridDistance = 30;
+
+    // heat legend behavior
+    series.columns.template.events.on("over", function (event) {
+      handleHover(event.target);
+    });
+
+    series.columns.template.events.on("hit", function (event) {
+      handleHover(event.target);
+    });
+
+    function handleHover(column) {
+      if (!isNaN(column.dataItem.value)) {
+        heatLegend.valueAxis.showTooltipAt(column.dataItem.value);
+      } else {
+        heatLegend.valueAxis.hideTooltip();
+      }
+    }
+
+    series.columns.template.events.on("out", function (event) {
+      heatLegend.valueAxis.hideTooltip();
+    });
+
+    $("#importance-modal").modal();
+    $("#importance-modal").modal("open");
   }
 
   var dimReductionData = null;

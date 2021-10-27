@@ -55,7 +55,7 @@ async function run() {
 
     // mkfeat
     // Feature
-    console.log("MK feat start!");
+    // console.log("MK feat start!");
     // const mkfeatUrl = config.mkfeat.url;
     // const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
     // const extractData = {

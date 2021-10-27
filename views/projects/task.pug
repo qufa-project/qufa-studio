@@ -5,6 +5,7 @@ block content
 
   include _option_btns
   include _visual_modal
+  include _importance_modal
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
@@ -16,7 +17,7 @@ block scripts
   script.
     am4core.addLicense("CH204832145");
   script
-    | var datasestId = #{dataset.id};
+    | var datasetId = #{dataset.id};
     | var projectId = #{project.id};
     if currentTask
       | var taskId = #{currentTask.id};
@@ -28,7 +29,7 @@ block scripts
       $(document).on("click", ".visual-btn", function (e) {
         if (taskId) {
           if (task == "imputation") {
-            $.getJSON("/datasets/" + datasestId + "/imputation", function(result) {
+            $.getJSON("/datasets/" + datasetId + "/imputation", function(result) {
               if (result && result.result) {
                 imputationResult = result.result
 

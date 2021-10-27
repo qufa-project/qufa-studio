@@ -61,6 +61,88 @@ async function run() {
 
     await RawDataManager.enqueueProfile(dataset);
 
+    console.log("Mk importance start!");
+
+    const dataTypesForImportance = ["number", "boolean"];
+
+    const targetAvailableMetas = dataset.metas.filter((el) =>
+      dataTypesForImportance.includes(el.colType)
+    );
+    const targetUnAvailableMetas = dataset.metas.filter(
+      (el) => !dataTypesForImportance.includes(el.colType)
+    );
+
+    const inputs = dataset.metas.map((el) => {
+      const obj = {
+        id: el.id,
+        name: el.name,
+        type: el.colType,
+      };
+      return obj;
+    });
+
+    const rowsForBulkInsert = [];
+
+    for (let i = 0; i < targetAvailableMetas.length; i++) {
+      const targetMeta = targetAvailableMetas[i];
+      for (let j = 0; j < inputs.length; j++) {
+        if (inputs[j].name == targetMeta.name) {
+          inputs[j]["label"] = true;
+        } else {
+          delete inputs[j]["label"];
+        }
+      }
+
+      const mkfeatUrl = config.mkfeat.url;
+      const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
+
+      const uri = `s3://qufa-test/${dataset.remotePath}`;
+
+      const payload = {
+        data: {
+          uri: uri,
+          columns: inputs,
+        },
+      };
+
+      const results = await mkfeatManager.batchImportanceJob(
+        payload,
+        async (progress) => {
+          const totalProgress =
+            i * (100 / targetAvailableMetas.length) +
+            progress / targetAvailableMetas.length;
+          console.log(`mk importance progress: ${totalProgress}`);
+          dataset.importanceProgress = totalProgress;
+          await dataset.save();
+        }
+      );
+
+      for (let i = 0; i < inputs.length; i++) {
+        inputs[i]["importance"] = results[i];
+      }
+
+      //generate result
+      for (let input of inputs) {
+        rowsForBulkInsert.push({
+          targetId: targetMeta.id,
+          featureId: input.id,
+          importance: input.importance,
+        });
+      }
+    }
+
+    for (let unableMeta of targetUnAvailableMetas) {
+      for (let input of inputs) {
+        rowsForBulkInsert.push({
+          targetId: unableMeta.id,
+          featureId: input.id,
+          importance: 0,
+        });
+      }
+    }
+
+    await Importance.bulkCreate(rowsForBulkInsert);
+
     process.exit(0);
   } catch (err) {
     console.error(err);
