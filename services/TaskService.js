@@ -10,6 +10,7 @@ const FileManager = require("../lib/FileManager");
 const MetaManager = require("../lib/MetaManager");
 const ImputationManager = require("../lib/ImputationManager");
 const ProfileManager = require("../lib/ProfileManager");
+const FairnessManager = require("../lib/FairnessManager");
 const DimReductionManager = require("../lib/DimReductionManager");
 const ChildProcessManager = require("../lib/ChildProcessManager");
 
@@ -129,6 +130,9 @@ class TaskService {
         case "dimReduction":
           await DimReductionManager.runDimReduction(dataset.remotePath);
           break;
+        case "fairness":
+          await FairnessManager.runFairness(dataset);
+          break;
         case "feature":
           const extractData = {
             data: {
@@ -201,6 +205,9 @@ class TaskService {
           break;
         case "imputation":
           taskFilePath = originDataset.getImputationResultPath(true);
+          break;
+        case "fairness":
+          taskFilePath = originDataset.getFairnessResultPath();
           break;
         case "feature":
           isOriginScheme = false;

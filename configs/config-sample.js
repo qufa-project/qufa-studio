@@ -14,6 +14,10 @@ const config = {
     baseUrl: "http://localhost:5000",
     token: "",
   },
+  fairness: {
+    baseUrl: "http://localhost:5000",
+    token: "",
+  },
   dimReduction: {
     baseUrl: "http://localhost:5100",
     token: "",

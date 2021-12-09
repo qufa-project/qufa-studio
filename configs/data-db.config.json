@@ -1,10 +1,10 @@
 {
   "development": {
-    "user": "iskim",
-    "password": "rladlstjd",
+    "user": "ptech",
+    "password": "Promptech6441!",
     "database": "qufa_data",
-    "host": "127.0.0.1",
-    "port": 3307,
+    "host": "qufa-data.clzcbcuems6r.ap-northeast-2.rds.amazonaws.com",
+    "port": 3306,
     "dialect": "mysql"
   },
   "test": {

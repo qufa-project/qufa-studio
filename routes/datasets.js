@@ -38,15 +38,19 @@ router.post("/", upload.single("file"), async function (req, res, next) {
 
 router.get("/:id", async function (req, res, next) {
   const dataset = await DatasetManager.findWithMeta(req.params.id);
-  const options = {
-    currentPage: req.query.currentPage || 1,
-    perPage: req.query.perPage || 50,
-    sortCol: req.query.sortCol || "id",
-    sortDir: req.query.sortDir || "asc",
-  };
+  if (dataset.status == "done") {
+    const options = {
+      currentPage: req.query.currentPage || 1,
+      perPage: req.query.perPage || 50,
+      sortCol: req.query.sortCol || "id",
+      sortDir: req.query.sortDir || "asc",
+    };
 
-  const results = await RawDataManager.search(dataset, options);
-  res.json({ dataset, results });
+    const results = await RawDataManager.search(dataset, options);
+    res.json({ dataset, results });
+  } else {
+    res.json(null);
+  }
 });
 
 router.get("/:id/profile", async function (req, res, next) {
@@ -125,6 +129,20 @@ router.get("/:id/outlier", async function (req, res, next) {
 router.get("/:id/importance", async function (req, res, next) {
   const data = await DatasetManager.findWithImportance(req.params.id);
   res.json(data);
+});
+
+router.get("/:id/fairness", async function (req, res, next) {
+  const dataset = await DatasetManager.find(req.params.id);
+
+  try {
+    const s3Obj = await FileManager.findS3Objct(
+      dataset.getFairnessResultJson()
+    );
+    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+  } catch (err) {
+    console.log(err);
+    res.json(null);
+  }
 });
 
 router.post("/originByProject", async function (req, res, next) {

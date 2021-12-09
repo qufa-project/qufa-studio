@@ -35,11 +35,23 @@ async function run() {
 
     const rows = await MetaManager.parseRecord(dataset, option);
     try {
+      console.log("Begin Insert Data ========================");
+      const startDate = new Date();
       await RawDataManager.insertData(dataset, rows.slice(1));
+      const endDate = new Date();
+      const seconds = (endDate.getTime() - startDate.getTime()) / 1000;
+      const iops = (rows.slice(1).length / seconds).toFixed(2);
+      console.log(
+        `End Insert Data: ${rows.slice(1).length} rows, 
+        ${seconds} seconds,
+        ${iops} IOPS
+        ========================`
+      );
       dataset.status = Dataset.status.done.stat;
       await dataset.save();
     } catch (error) {
       console.log("Exception in insertData =======================");
+      console.log(error);
       dataset.status = Dataset.status.error.stat;
       await dataset.save();
 
@@ -92,6 +104,7 @@ async function run() {
 
     // await MkFeature.bulkCreate(featuresForBulkInsert);
 
+    // Importance ------------------------------------------------------------------
     // importance nxn matrix를 생성한다.
     console.log("Mk importance start!");
 
@@ -137,6 +150,9 @@ async function run() {
         },
       };
 
+      console.log(" Payload ======================");
+      console.log(inputs);
+
       const results = await mkfeatManager.batchImportanceJob(
         payload,
         async (progress) => {
@@ -148,6 +164,9 @@ async function run() {
           await dataset.save();
         }
       );
+
+      console.log("importance result ========================");
+      console.log(results);
 
       for (let i = 0; i < inputs.length; i++) {
         inputs[i]["importance"] = results[i];

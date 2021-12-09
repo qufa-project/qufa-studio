@@ -29,18 +29,27 @@ $(document).ready(function () {
     });
   };
 
+  var dataRows;
+  var totalRows = 0;
+
   $.when(t1(), t2(), t3(), t4()).done(function () {
     findMetaWithData();
   });
+
+  var timer = setInterval(function () {
+    if (!dataRows) {
+      findMetaWithData();
+    } else {
+      clearInterval(timer);
+    }
+  }, 2000);
 
   var hasMoreData = true;
   var searchOption = {
     currentPage: 1,
     perPage: 50,
   };
-  var totalRows = 0;
 
-  var dataRows;
   function findMetaWithData(isForced) {
     if (!$(".loading").hasClass("active")) {
       $(".loading").addClass("active");
@@ -50,78 +59,80 @@ $(document).ready(function () {
 
     if (!dataRows || isForced) {
       $.getJSON("/datasets/" + datasetId, searchOption, function (d) {
-        var metaHtml = metaTemplate(d.dataset.metas);
-        $("#meta-wrap").html(metaHtml);
+        if (d && d.dataset) {
+          var metaHtml = metaTemplate(d.dataset.metas);
+          $("#meta-wrap").html(metaHtml);
 
-        if (d.results && d.results.rows && d.results.rows.length) {
-          dataRows = d.results.rows;
-          var rowsHtml = rowsTemplate(d.results.rows);
-          $("#rows").html(rowsHtml);
+          if (d.results && d.results.rows && d.results.rows.length) {
+            dataRows = d.results.rows;
+            var rowsHtml = rowsTemplate(d.results.rows);
+            $("#rows").html(rowsHtml);
 
-          totalRows = d.results.count.cnt;
+            totalRows = d.results.count.cnt;
 
-          var pageInfo = {
-            currentPage: searchOption.currentPage,
-            total: Math.ceil(totalRows / searchOption.perPage),
-            pages: [],
-          };
+            var pageInfo = {
+              currentPage: searchOption.currentPage,
+              total: Math.ceil(totalRows / searchOption.perPage),
+              pages: [],
+            };
 
-          for (
-            var i = pageInfo.currentPage - 3;
-            i <= pageInfo.currentPage + 3;
-            ++i
-          ) {
-            if (i > 0) {
-              pageInfo.pages.push(i);
-            }
-          }
-
-          var paginationHtml = pageTemplate(pageInfo);
-          $("#rows-pagination").html(paginationHtml);
-
-          $(".loading").removeClass("active");
-
-          renderProfileResult();
-
-          if (task && task == "imputation") {
-            var dataIds = [];
-            for (var row of dataRows) {
-              dataIds.push(row[0]);
+            for (
+              var i = pageInfo.currentPage - 3;
+              i <= pageInfo.currentPage + 3;
+              ++i
+            ) {
+              if (i > 0) {
+                pageInfo.pages.push(i);
+              }
             }
 
-            $.ajax({
-              url: "/datasets/originByProject",
-              type: "POST",
-              contentType: "application/json",
-              data: JSON.stringify({
-                projectId: projectId,
-                dataIds: dataIds,
-              }),
-              success: function (d) {
-                if (d && d.rows) {
-                  var dataLength = d.rows.length;
-                  for (var i = 0; i < dataLength; i++) {
-                    var origin = dataRows[i];
-                    var imputed = d.rows[i];
+            var paginationHtml = pageTemplate(pageInfo);
+            $("#rows-pagination").html(paginationHtml);
 
-                    for (var j = 0; j < origin.length; j++) {
-                      if (origin[j] != imputed[j]) {
-                        $(
-                          ".data-row[data-id='" +
-                            origin[0] +
-                            "'] td:nth-child(" +
-                            j +
-                            ")"
-                        ).addClass("teal");
+            $(".loading").removeClass("active");
+
+            renderProfileResult();
+
+            if (task && task == "imputation") {
+              var dataIds = [];
+              for (var row of dataRows) {
+                dataIds.push(row[0]);
+              }
+
+              $.ajax({
+                url: "/datasets/originByProject",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                  projectId: projectId,
+                  dataIds: dataIds,
+                }),
+                success: function (d) {
+                  if (d && d.rows) {
+                    var dataLength = d.rows.length;
+                    for (var i = 0; i < dataLength; i++) {
+                      var origin = dataRows[i];
+                      var imputed = d.rows[i];
+
+                      for (var j = 0; j < origin.length; j++) {
+                        if (origin[j] != imputed[j]) {
+                          $(
+                            ".data-row[data-id='" +
+                              origin[0] +
+                              "'] td:nth-child(" +
+                              j +
+                              ")"
+                          ).addClass("teal");
+                        }
                       }
                     }
                   }
-                }
-              },
-              error: function (err) {
-                console.log(err);
-              },
-            });
+                },
+                error: function (err) {
+                  console.log(err);
+                },
+              });
+            }
           }
         }
       });

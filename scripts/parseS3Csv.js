@@ -105,6 +105,9 @@ async function run() {
         },
       };
 
+      console.log(" Payload ======================");
+      console.log(payload);
+
       const results = await mkfeatManager.batchImportanceJob(
         payload,
         async (progress) => {
@@ -116,6 +119,9 @@ async function run() {
           await dataset.save();
         }
       );
+
+      console.log("importance result ========================");
+      console.log(results);
 
       for (let i = 0; i < inputs.length; i++) {
         inputs[i]["importance"] = results[i];

@@ -63,6 +63,30 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
+    getFairnessDomain() {
+      if (this.remotePath.indexOf("health") > -1) {
+        return "health";
+      } else {
+        return "traffic";
+      }
+    }
+
+    getFairnessResultPath() {
+      if (this.getFairnessDomain() == "health") {
+        return `fairness/health_after.csv`;
+      } else {
+        return `fairness/traffic_after.csv`;
+      }
+    }
+
+    getFairnessResultJson() {
+      if (this.getFairnessDomain() == "health") {
+        return `fairness/json/health_result.json`;
+      } else {
+        return `fairness/traffic_result.json`;
+      }
+    }
+
     getResultJson() {
       if (this.remotePath) {
         let pos = this.remotePath.lastIndexOf(".");

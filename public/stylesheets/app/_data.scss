@@ -197,3 +197,33 @@ table.preview-table {
 #importance-result {
   height: 60vh;
 }
+
+.tpr-box {
+  .box-item {
+    text-align: center;
+    padding-top: 48px;
+    padding-bottom: 48px;
+    font-size: 20px;
+    border: 1px solid #f2f2f2;
+  }
+
+  .box-tp {
+    background-color: #00bcd4;
+    color: #000;
+  }
+
+  .box-fn {
+    background-color: #009688;
+    color: #fff;
+  }
+
+  .box-fp {
+    background-color: #4caf50;
+    color: #000;
+  }
+
+  .box-tn {
+    background-color: #546e7a;
+    color: #fff;
+  }
+}

@@ -13,10 +13,19 @@
       a.btn-floating.orange.importance-btn.tooltipped(href="#importance-modal" data-position="left" data-tooltip="중요도 분석")
         i.material-icons pivot_table_chart
         
-    if currentTask
+    if currentTask && currentTask.task != "fairness"
       li
         a.btn-floating.green.visual-btn.tooltipped(href="#visual-modal" data-position="left" data-tooltip="시각화" data-task=currentTask.task)
           i.material-icons analytics
+    if currentTask && currentTask.task == "fairness"
+      li
+        a.btn-floating.green.compare-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="시각화" data-task=currentTask.task)
+          i.material-icons analytics
+
+      li
+        a.btn-floating.cyan.compare-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="공정성 지표 비교" data-task="tpr")
+          i.material-icons grid_view
+
     li
       a.btn-floating.blue.tooltipped(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="다운로드")
         i.material-icons file_download

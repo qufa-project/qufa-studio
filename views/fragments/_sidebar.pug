@@ -1,16 +1,68 @@
-ul#slide-out.sidenav.sidenav-fixed
+ul#slide-out.sidenav.sidenav-fixed.collapsible
   li
     a.active(href='/projects')
       i.material-icons folder_shared
       | 프로젝트 관리
   li
     a(href='#!') 
-      i.material-icons source
+      i.material-icons folder_copy
       | 데이터 관리
   li
+    a.collapsible-header.waves-effect.waves-teal(tabindex='0') 
+      i.material-icons description
+      | Profiling
+    .collapsible-body
+      ul
+        li
+          a(href='#!') Batch Profiling
+        li
+          a(href='#!') Basic Profiling
+        li.active
+          a(href='#!') Number Profiling
+        li.active
+          a(href='#!') String Profiling
+        li.active
+          a(href='#!') Date Profiling
+  li
+    a.collapsible-header.waves-effect.waves-teal(tabindex='0') 
+      i.material-icons military_tech
+      | Quality Management
+    .collapsible-body
+      ul
+        li
+          a(href='#!') Missing Value Imputation
+        li
+          a(href='#!') Outlier Detection
+        li
+          a(href='#!') Feature Engineering
+  li
     a(href='#!') 
-      i.material-icons cloud
-      | 데이터 저장소
+      i.material-icons balance
+      | Fairness
+  li
+    a.collapsible-header.waves-effect.waves-teal(tabindex='0') 
+      i.material-icons transform
+      | Transformation
+    .collapsible-body
+      ul
+        li
+          a(href='#!') Label Encoding
+        li
+          a(href='#!') One-Hot Encoding
+        li
+          a(href='#!') Standarization
+        li
+          a(href='#!') Normalization
+        li
+          a(href='#!') Regularization
+        li
+          a(href='#!') Discretization
+        li
+          a(href='#!') Binarization
+        li
+          a(href='#!') Principal Component Analysis
+        li
+          a(href='#!') Factor Analysis
   li
     .divider
   li
@@ -20,9 +72,9 @@ ul#slide-out.sidenav.sidenav-fixed
     if currentUser.group.id == 1
       li
         a(href='/groups') 
-          i.material-icons group
+          i.material-icons groups
           | 그룹관리
     li
       a(href='/users') 
-        i.material-icons group
+        i.material-icons assignment_ind
         | 그룹 사용자관리

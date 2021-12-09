@@ -6,10 +6,15 @@ nav {
 
 .sidenav {
   padding-top: 4px;
+  border: none !important;
 
   &.sidenav-fixed {
     top: 64px;
     background: #000;
+  }
+
+  .collapsible-body {
+    background-color: transparent;
   }
 
   li {
@@ -23,6 +28,10 @@ nav {
       > i {
         margin: 0 16px 0 0 !important;
         color: #8494ae !important;
+      }
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
       }
 
       &.active {

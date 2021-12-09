@@ -6,6 +6,8 @@ block content
   include _option_btns
   include _visual_modal
   include _importance_modal
+  include _compare_modal
+  include _profile_modal
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
@@ -53,6 +55,54 @@ block scripts
           }
         }
       });
+
+      $(document).on("click", ".compare-btn", function() {
+        console.log($(this).data('task'));
+
+        $.getJSON("/datasets/" + datasetId + "/fairness", function(result) {
+          var beforeMatrix1 = [];
+          beforeMatrix1.push('<div class="tpr-box row">');
+          beforeMatrix1.push('<div class="col s12">');
+          beforeMatrix1.push('  <div class="col s6 box-item box-tp">');
+          beforeMatrix1.push(result.before.tp_a);
+          beforeMatrix1.push('  </div>');
+          beforeMatrix1.push('  <div class="col s6 box-item box-fn">');
+          beforeMatrix1.push(result.before.fn_a);
+          beforeMatrix1.push('  </div>');
+          beforeMatrix1.push('  <div class="col s6 box-item box-fp">');
+          beforeMatrix1.push(result.before.fp_a);
+          beforeMatrix1.push('  </div>');
+          beforeMatrix1.push('  <div class="col s6 box-item box-tn">');
+          beforeMatrix1.push(result.before.tn_a);
+          beforeMatrix1.push('  </div>');
+          beforeMatrix1.push("</div>");
+          beforeMatrix1.push("</div>");
+
+          var afterMatrix1 = [];
+          afterMatrix1.push('<div class="tpr-box row">');
+          beforeMatrix1.push('<div class="col s12">');
+          afterMatrix1.push('  <div class="col s6 box-item box-tp">');
+          afterMatrix1.push(result.after.tp_a);
+          afterMatrix1.push('  </div>');
+          afterMatrix1.push('  <div class="col s6 box-item box-fn">');
+          afterMatrix1.push(result.after.fn_a);
+          afterMatrix1.push('  </div>');
+          afterMatrix1.push('  <div class="col s6 box-item box-fp">');
+          afterMatrix1.push(result.after.fp_a);
+          afterMatrix1.push('  </div>');
+          afterMatrix1.push('  <div class="col s6 box-item box-tn">');
+          afterMatrix1.push(result.after.tn_a);
+          afterMatrix1.push('  </div>');
+          afterMatrix1.push("</div>");  
+          afterMatrix1.push("</div>");          
+
+          $("#before-result").html(beforeMatrix1.join(""));
+          $("#after-result").html(afterMatrix1.join(""));
+
+          $("#compare-modal").modal();
+          $("#compare-modal").modal("open");
+        });
+      })
 
       function renderImputationChart(chartId, data) {
         am4core.ready(function() {
