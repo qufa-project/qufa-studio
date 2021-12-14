@@ -42,7 +42,7 @@ router.get("/:id", async function (req, res, next) {
     const options = {
       currentPage: req.query.currentPage || 1,
       perPage: req.query.perPage || 50,
-      sortCol: req.query.sortCol || "id",
+      sortCol: req.query.sortCol || "_id_",
       sortDir: req.query.sortDir || "asc",
     };
 

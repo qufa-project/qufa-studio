@@ -12,8 +12,8 @@ config.port = process.env.QUFA_DB_PORT || 3306;
 
 const initSession = (app) => {
   const options = {
-    host: config.host | "localhost",
-    port: config.port | 3306,
+    host: config.host || "localhost",
+    port: config.port || 3306,
     user: config.username,
     password: config.password,
     database: config.database,

@@ -41,3 +41,4 @@
 ### Docker Deploy
 
 - env-sample 참고하여 env 생성
+- ex) docker run -p 3000:3000 --rm -d --name qufa-web --env-file ./env -t qufa-web

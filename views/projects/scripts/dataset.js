@@ -145,8 +145,9 @@ $(document).ready(function () {
   function renderProfileResult() {
     if (!profileResult) {
       $.getJSON("/datasets/" + datasetId + "/profile", function (d) {
-        if (d && d.status == "success") {
+        if (d && d.status == "SUCCESS") {
           profileResult = d.results;
+          console.log(profileResult);
 
           var profileHtml = profileTemplate(profileResult);
           $("#profile-wrap").html(profileHtml);

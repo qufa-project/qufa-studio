@@ -11,6 +11,10 @@ RUN npm install
 # If you are building your code for production
 # RUN npm ci --only=production
 
+RUN npm install -g pm2 
+
 COPY . .
 
 EXPOSE 3000
+
+CMD ["pm2-runtime", "start", "./bin/www", "--env", "production"]
