@@ -14,8 +14,9 @@ block scripts
   script(src='/javascripts/app/handlebars-helper.js')
   script(src='https://cdn.amcharts.com/lib/4/core.js')
   script(src='https://cdn.amcharts.com/lib/4/charts.js')
+  script(src='https://cdn.amcharts.com/lib/4/plugins/sunburst.js')
   script(src='https://cdn.amcharts.com/lib/4/themes/animated.js')
-  
+
   script.
     am4core.addLicense("CH204832145");
   script
@@ -56,10 +57,67 @@ block scripts
         }
       });
 
+      $(document).on("click", ".compare-data-btn", function() {
+        $.getJSON("/datasets/" + datasetId + "/fairness", function(result) {
+          console.log(result);
+
+          renderSunburst("before-result", result.before.children);
+          renderSunburst("after-result", result.after.children);
+
+          $("#compare-modal").modal();
+          $("#compare-modal").modal("open");
+        });
+      });
+
+      function renderSunburst(container, data) {
+        am4core.useTheme(am4themes_animated);
+
+        var chart = am4core.create(container, am4plugins_sunburst.Sunburst);
+        chart.padding(0,0,0,0);
+        chart.radius = am4core.percent(98);
+
+        chart.data = data;
+
+        chart.colors.step = 5;
+        chart.fontSize = 11;
+        chart.innerRadius = am4core.percent(10);
+
+        // define data fields
+        chart.dataFields.value = "size";
+        chart.dataFields.name = "name";
+        chart.dataFields.children = "children";
+
+        var level0SeriesTemplate = new am4plugins_sunburst.SunburstSeries();
+        level0SeriesTemplate.hiddenInLegend = false;
+        chart.seriesTemplates.setKey("0", level0SeriesTemplate)
+
+        // this makes labels to be hidden if they don't fit
+        level0SeriesTemplate.labels.template.truncate = false;
+        level0SeriesTemplate.labels.template.hideOversized = false;
+
+        level0SeriesTemplate.labels.template.adapter.add("rotation", function(rotation, target) {
+          target.maxWidth = target.dataItem.slice.radius - target.dataItem.slice.innerRadius - 10;
+          target.maxHeight = Math.abs(target.dataItem.slice.arc * (target.dataItem.slice.innerRadius + target.dataItem.slice.radius) / 2 * am4core.math.RADIANS);
+
+          return rotation;
+        })
+
+
+        var level1SeriesTemplate = level0SeriesTemplate.clone();
+        chart.seriesTemplates.setKey("1", level1SeriesTemplate)
+        level1SeriesTemplate.fillOpacity = 0.75;
+        level1SeriesTemplate.hiddenInLegend = true;
+
+        var level2SeriesTemplate = level0SeriesTemplate.clone();
+        chart.seriesTemplates.setKey("2", level2SeriesTemplate)
+        level2SeriesTemplate.fillOpacity = 0.5;
+        level2SeriesTemplate.hiddenInLegend = true;
+      }
+
       $(document).on("click", ".compare-btn", function() {
         console.log($(this).data('task'));
 
-        $.getJSON("/datasets/" + datasetId + "/fairness", function(result) {
+        $.getJSON("/datasets/" + datasetId + "/fairnessResult", function(result) {
           var beforeMatrix1 = [];
           beforeMatrix1.push('<div class="tpr-box row">');
           beforeMatrix1.push('<div class="col s12">');

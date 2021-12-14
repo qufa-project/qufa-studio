@@ -15,10 +15,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "user": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "user": "",
+    "password": "",
+    "database": "qufa_data",
+    "host": "",
     "dialect": "mysql"
   }
 }

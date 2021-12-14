@@ -79,6 +79,15 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
 
+    getFairnessDataJson(isBefore) {
+      let dataTerm = "before";
+      if (!isBefore) {
+        dataTerm = "after";
+      }
+
+      return `fairness/sunburst/${this.getFairnessDomain()}.${dataTerm}.json`;
+    }
+
     getFairnessResultJson() {
       if (this.getFairnessDomain() == "health") {
         return `fairness/json/health_result.json`;

@@ -135,6 +135,28 @@ router.get("/:id/fairness", async function (req, res, next) {
   const dataset = await DatasetManager.find(req.params.id);
 
   try {
+    const before = await FileManager.findS3Objct(
+      dataset.getFairnessDataJson(true)
+    );
+
+    const after = await FileManager.findS3Objct(
+      dataset.getFairnessDataJson(false)
+    );
+
+    res.json({
+      before: JSON.parse(before.Body.toString("utf-8")),
+      after: JSON.parse(after.Body.toString("utf-8")),
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(null);
+  }
+});
+
+router.get("/:id/fairnessResult", async function (req, res, next) {
+  const dataset = await DatasetManager.find(req.params.id);
+
+  try {
     const s3Obj = await FileManager.findS3Objct(
       dataset.getFairnessResultJson()
     );

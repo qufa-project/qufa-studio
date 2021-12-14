@@ -103,7 +103,13 @@ block scripts
                 var value = rowItem[col.name];
                 col.type = findType(value);
                 if (col.type == "number") {
-                  col.maxLen = Math.max(10, ("" + value).length);
+                  var strValue = "" + value;
+                  col.maxLen = Math.max(10, strValue.length);
+
+                  if (strValue.indexOf(".") > -1) {
+                    col.floatLen = Math.max(5, strValue.split(".")[1].length);
+                  }
+                  
                 } else if (col.type == "string") {
                   col.maxLen = Math.max(50, ("" + value).length + 25);
                 } else {
