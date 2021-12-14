@@ -1,27 +1,26 @@
 const config = {
   aws: {
-    accessKeyId: "",
-    secretAccessKey: "",
-    region: "",
+    accessKeyId: process.env.ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.SECRET_ACCESS_KEY || "",
+    region: process.env.REGION || "ap-northeast-2",
   },
   mkfeat: {
-    url: "http://123.123.123.123:5000",
+    url: process.env.FEAT_URL || "",
   },
   profiler: {
-    baseUrl: "http://localhost:8080",
+    baseUrl: process.env.PROFILER_URL || "",
   },
   imputation: {
-    baseUrl: "http://localhost:5000",
-    token: "",
+    baseUrl: process.env.IMPUTATION_URL || "",
+    token: process.env.IMPUTATION_TOKEN || "",
   },
   fairness: {
-    baseUrl: "http://localhost:5000",
-    token: "",
+    baseUrl: process.env.FAIRNESS_URL || "",
+    token: process.env.FAIRNESS_TOKEN || "",
   },
   dimReduction: {
-    baseUrl: "http://localhost:5100",
-    token: "",
+    baseUrl: process.env.DIM_REDUCTION_URL || "",
+    token: process.env.DIM_REDUCTION_TOKEN || "",
   },
 };
-
 module.exports = config;

@@ -12,7 +12,10 @@
 ### [Sequelize ORM](https://sequelize.org/)
 
 - config/db.config-sample.json 참고하여 db.config.json 생성
+
   - Sequelize와 mysql2 동시 활용을 위해 user, username 컬럼 각각 정의
+
+- config/data-db.config-sample.json 참고하여 data-db.config.json 생성
 
 ```sh
 # model 및 migration 생성
@@ -26,6 +29,7 @@
 ```
 
 ### Seed
+
 ```sh
 # seed 생성
 > npx sequelize seed:generate --name defaultGroup
@@ -33,3 +37,7 @@
 # run
 > npx sequelize-cli db:seed:all --config=./configs/db.config.json
 ```
+
+### Docker Deploy
+
+- env-sample 참고하여 env 생성

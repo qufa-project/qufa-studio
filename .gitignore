@@ -1,5 +1,8 @@
+env
+
 config/config.json
 configs/data-db.config.json
+configs/db.config.json
 database.json
 
 *.css
