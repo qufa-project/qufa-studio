@@ -12,6 +12,7 @@ config.database = process.env.QUFA_DB_DATABASE || config.database;
 config.host = process.env.QUFA_DB_HOST || config.host;
 config.dialect = process.env.QUFA_DB_DIALECT || "mysql";
 config.port = process.env.QUFA_DB_PORT || 3306;
+config.logging = process.env.QUFA_DB_LOGGING || env == "development";
 
 const db = {};
 
