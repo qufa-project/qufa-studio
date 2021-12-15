@@ -1,7 +1,10 @@
 var express = require("express");
 const passport = require("passport");
 var router = express.Router();
-const auth = require('../utils/auth')
+const auth = require("../utils/auth");
+const ProjectService = require("../services/ProjectService");
+
+const projectService = new ProjectService();
 
 const DataManager = require("../lib/DataManager");
 
@@ -18,41 +21,49 @@ const formatBytes = function (bytes, decimals = 2) {
 };
 
 /* GET home page. */
-router.get("/", auth.checkAuth, async function (req, res, next) {
-  const pageOption = {
-    currentPage: req.query.currentPage || 1,
-    perPage: req.query.perPage,
-  };
+router.get(
+  "/",
+  auth.checkAuth,
+  auth.checkRole(1),
+  async function (req, res, next) {
+    const options = {
+      currentPage: req.query.currentPage || 1,
+      perPage: req.query.perPage || 10,
+      sortCol: req.query.sortCol || "id",
+      sortDir: req.query.sortDir || "DESC",
+      groupId: req.user.group.id,
+    };
 
-  const data = await DataManager.findAll(pageOption);
+    const projects = await projectService.findAllByGroup(options);
+    options.currentPage = parseInt(options.currentPage);
+    options.path = "/projects";
+    options.query = req.query;
+    options.total = Math.ceil(projects.count / options.perPage);
 
-  pageOption.currentPage = parseInt(pageOption.currentPage);
-  pageOption.total = Math.ceil(data.count / pageOption.perPage);
-  pageOption.path = req.path;
-  pageOption.query = req.query;
+    res.render("projects/index", {
+      title: "QUFA 프로젝트 목록",
+      projects,
+      pageOption: options,
+    });
+  }
+);
 
-  res.render("index", {
-    title: "QUFA 통합관리시스템",
-    data,
-    dataStatus: DataManager.DATA_STATUS,
-    pageOption,
-    formatBytes,
-  });
+router.get("/login", function (req, res, next) {
+  res.render("users/login");
 });
 
-router.get("/login", function(req, res, next) {
-  res.render("users/login")
-})
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureFlash: true,
+    failureRedirect: "/login",
+  })
+);
 
-router.post("/login", passport.authenticate('local', {
-  successRedirect: '/',
-  failureFlash: true,
-  failureRedirect: '/login'
-}))
-
-router.get("/logout", function(req, res, next) {
-  req.session.destroy()
-  res.redirect("/login")
-})
+router.get("/logout", function (req, res, next) {
+  req.session.destroy();
+  res.redirect("/login");
+});
 
 module.exports = router;
