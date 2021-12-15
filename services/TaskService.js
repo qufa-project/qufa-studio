@@ -273,7 +273,7 @@ class TaskService {
 
       try {
         const profileResult = await ProfileManager.findProfileResult(dataset);
-        if (profileResult && profileResult.status == "success") {
+        if (profileResult && profileResult.status == "SUCCESS") {
           dataset.hasProfile = true;
           await dataset.save();
 
