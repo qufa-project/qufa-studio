@@ -4,6 +4,7 @@ const { Project, Task, Dataset, Meta, MkFeature } = require("../models");
 
 const ProjectService = require("./ProjectService");
 const DatasetService = require("./DatasetService");
+const ColstatService = require("./ColstatService");
 
 const DatasetManager = require("../lib/DatasetManager");
 const FileManager = require("../lib/FileManager");
@@ -20,6 +21,7 @@ const mkfeatManager = new MkfeatManager({ endpoint: mkfeatUrl });
 
 const projectService = new ProjectService();
 const datasetService = new DatasetService();
+const colstatService = new ColstatService();
 
 /**
  * Task 처리 Service
@@ -241,7 +243,7 @@ class TaskService {
           const metas = MetaManager.extractMeta(records, 1);
           await datasetService.createMetas(dataset, metas);
         }
-        ChildProcessManager.runS3CsvParser(dataset, {});
+        ChildProcessManager.runS3CsvParser(dataset);
 
         task.status = Task.status.save_data.stat;
         await task.save();
@@ -276,6 +278,10 @@ class TaskService {
         if (profileResult && profileResult.status == "SUCCESS") {
           dataset.hasProfile = true;
           await dataset.save();
+
+          if (task.task === "fairness") {
+            colstatService.calcColStat(task.projectId);
+          }
 
           await task.setDone();
 

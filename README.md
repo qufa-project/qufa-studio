@@ -20,7 +20,7 @@
 ```sh
 # model 및 migration 생성
 # model 생성 후 tableName 설정 추가 필요(Case 문제)
-> npx sequelize-cli model:generate --name Data --attributes name:string,contentType:string,fileSize:bigint,remotePath:string,originFileName:string,dataTable:string
+> npx sequelize-cli model:generate --name Dataset --attributes name:string,contentType:string,fileSize:bigint,remotePath:string,originFileName:string,dataTable:string
 
 > npx sequelize-cli model:generate --name Meta --attributes dataId:integer,name:string,koName:string,colType:string,maxLength:integer,floatLength:integer,dateFormat:string,trueValue:string,isNotNull:boolean,isUnique:boolean,isIndex:boolean
 
