@@ -15,7 +15,7 @@ RUN npm install -g pm2
 
 COPY . .
 
-RUN npx sequelize-cli db:migrate --config=./configs/db.config.json
+RUN npx sequelize-cli db:migrate --config=./configs/db.config.js
 
 EXPOSE 3000
 
