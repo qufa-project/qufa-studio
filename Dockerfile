@@ -15,6 +15,11 @@ RUN npm install -g pm2
 
 COPY . .
 
+ENV QUFA_DB_USER=$QUFA_DB_USER
+ENV QUFA_DB_PASSWORD=$QUFA_DB_PASSWORD
+ENV QUFA_DB_DATABASE=$QUFA_DB_DATABASE
+ENV QUFA_DB_HOST=$QUFA_DB_HOST
+
 RUN npx sequelize-cli db:migrate --config=./configs/db.config.js
 
 EXPOSE 3000
