@@ -279,8 +279,9 @@ class TaskService {
           dataset.hasProfile = true;
           await dataset.save();
 
-          if (task.task === "fairness") {
-            colstatService.calcColStat(task.projectId);
+          console.log(task.task);
+          if (task.task == "fairness") {
+            await colstatService.calcColStat(task.projectId);
           }
 
           await task.setDone();

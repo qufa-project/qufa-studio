@@ -15,6 +15,8 @@ RUN npm install -g pm2
 
 COPY . .
 
+RUN npx sequelize-cli db:migrate --config=./configs/db.config.json
+
 EXPOSE 3000
 
 CMD ["pm2-runtime", "start", "./bin/www", "--env", "production"]

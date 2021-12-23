@@ -64,7 +64,9 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     getFairnessDomain() {
-      if (this.remotePath.indexOf("health") > -1) {
+      if (this.remotePath.indexOf("health2") > -1) {
+        return "health2";
+      } else if (this.remotePath.indexOf("health") > -1) {
         return "health";
       } else {
         return "traffic";
@@ -74,6 +76,8 @@ module.exports = (sequelize, DataTypes) => {
     getFairnessResultPath() {
       if (this.getFairnessDomain() == "health") {
         return `fairness/health_after.csv`;
+      } else if (this.getFairnessDomain() == "health2") {
+        return `fairness/health2_after.csv`;
       } else {
         return `fairness/traffic_after.csv`;
       }
