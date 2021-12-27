@@ -2,8 +2,23 @@ const { Project, Task, Dataset, Meta, ColStat } = require("../models");
 const RawDataManager = require("../lib/RawDataManager");
 
 class ColstatService {
+  async search(datasetId, cols, isOrigin) {
+    const colStats = await ColStat.findAll({
+      where: {
+        col_name: cols,
+        datasetId,
+        isOrigin,
+      },
+      order: [
+        ["col_name", "ASC"],
+        ["col_value", "ASC"],
+      ],
+    });
+
+    return colStats;
+  }
+
   async calcColStat(projectId) {
-    console.log(`projectId: ${projectId}`);
     const project = await Project.findOne({
       where: { id: projectId },
       include: [

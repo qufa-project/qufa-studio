@@ -7,6 +7,7 @@ block content
   include _visual_modal
   include _importance_modal
   include _compare_modal
+  include _fairness_compare_modal
   include _profile_modal
 
 block scripts
@@ -58,16 +59,130 @@ block scripts
       });
 
       $(document).on("click", ".compare-data-btn", function() {
-        $.getJSON("/datasets/" + datasetId + "/fairness", function(result) {
-          console.log(result);
-
-          renderSunburst("before-result", result.before.children);
-          renderSunburst("after-result", result.after.children);
-
-          $("#compare-modal").modal();
-          $("#compare-modal").modal("open");
-        });
+        $("#fairness-compare-modal").modal();
+        $("#fairness-compare-modal").modal("open");
+        
+        //- $.getJSON("/datasets/" + datasetId + "/fairness", function(result) {
+        //-   console.log(result);
+        //-   renderSunburst("before-result", result.before.children);
+        //-   renderSunburst("after-result", result.after.children);
+        //- });
       });
+
+      $("#check-all").click(function() {
+        $(".col-checkbox").prop("checked", $(this).is(":checked"));
+      });
+
+      $("#btn-fairness-viz").click(function() {
+        var checkedCols = [];
+        $(".col-checkbox:checked").each(function(idx, cBox) {
+          checkedCols.push($(cBox).val());
+        });
+
+        if (checkedCols.length) {
+          $.ajax({
+            url: "/datasets/" + datasetId + "/fairness",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({checkedCols: checkedCols}),
+            success: function(d) {
+              console.log(d);
+              if (d.before && d.after) {
+                var beforeG = _.groupBy(d.before, 'colName');
+                var afterG = _.groupBy(d.after, 'colName');
+                
+                _.forEach(beforeG, function(value, key) {
+                  if (value.length < 20) {
+                    var graphId = "graph-" + key;
+                    var $graphWrap = $("<div/>").addClass("col").addClass("s12").addClass("l4").append($("<div/>").attr("id", graphId).addClass("chart-wrap"));
+                    $("#result-graph").append($graphWrap);
+                  }
+                });
+
+                _.forEach(beforeG, function(value, key) {
+                  if (value.length < 20) {
+                    var graphId = "graph-" + key;
+                    var chartData = [];
+
+                    var beforeObj = {
+                      category: "Before " + key
+                    };
+
+                    _.forEach(value, function(v) {
+                      beforeObj["" + v.colValue] = v.colCount
+                    });
+
+                    var afterObj = {
+                      category: "After " + key
+                    };
+
+                    _.forEach(afterG[key], function(v) {
+                      afterObj["" + v.colValue] = v.colCount
+                    });
+
+                    chartData.push(beforeObj);
+                    chartData.push(afterObj);
+
+                    renderFairnessChart(graphId, chartData);
+                  }
+                });
+              }
+            }
+          })
+        }
+      });
+
+      function renderFairnessChart(container, data) {
+        am4core.ready(function() {
+          // Themes begin
+          am4core.useTheme(am4themes_animated);
+          // Themes end
+
+          var chart = am4core.create(container, am4charts.XYChart);
+          chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+          chart.data = data;
+          chart.padding(30, 30, 10, 30);
+          // chart.legend = new am4charts.Legend();
+
+          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+          categoryAxis.dataFields.category = "category";
+          categoryAxis.renderer.grid.template.location = 0;
+
+          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+          valueAxis.min = 0;
+          valueAxis.max = 100;
+          valueAxis.strictMinMax = true;
+          valueAxis.calculateTotals = true;
+          valueAxis.renderer.minWidth = 50;
+
+          _.forEach(data[0], function(val, k) {
+            if (k != "category") {
+              createSeries(val, k);
+            }
+          });
+
+          function createSeries(value, name) {
+            var series = chart.series.push(new am4charts.ColumnSeries());
+            series.columns.template.width = am4core.percent(80);
+            series.columns.template.tooltipText =
+              "{name}: {valueY.totalPercent.formatNumber('#.00')}%";
+            series.name = ""+name;
+            series.dataFields.categoryX = "category";
+            series.dataFields.valueY = name;
+            series.dataFields.valueYShow = "totalPercent";
+            series.dataItems.template.locations.categoryX = 0.5;
+            series.stacked = true;
+            series.tooltip.pointerOrientation = "vertical";
+
+            var bullet = series.bullets.push(new am4charts.LabelBullet());
+            bullet.interactionsEnabled = false;
+            bullet.label.text = "{valueY.totalPercent.formatNumber('#.00')}%";
+            bullet.label.fill = am4core.color("#ffffff");
+            bullet.locationY = 0.5;
+          }
+        });
+      }
 
       function renderSunburst(container, data) {
         am4core.useTheme(am4themes_animated);

@@ -1,0 +1,23 @@
+//  Modal Structure 
+#fairness-compare-modal.modal.lg
+  .modal-content
+    h4 항목별 데이터 분포 비교
+
+    #compare-cols.row
+      .col
+        label(for='check-all')
+          input#check-all.filled-in(type='checkbox' checked)
+          span ALL
+      each meta in dataset.metas
+        .col
+          label(for=`col-${meta.name}`)
+            input.filled-in.col-checkbox(id=`col-${meta.name}` type='checkbox' value=meta.name checked)
+            span=meta.name
+      .col
+        a#btn-fairness-viz.waves-effect.waves-light.btn Search
+
+    #result-graph.row
+      
+
+  .modal-footer
+    a.modal-close.waves-effect.waves-green.btn-flat(href='#!') 확인

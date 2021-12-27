@@ -11,6 +11,9 @@ const profileConfig = require("../configs/config").profiler;
 const DatasetService = require("../services/DatasetService");
 const datasetService = new DatasetService();
 
+const ColstatService = require("../services/ColstatService");
+const colstatService = new ColstatService();
+
 const DatasetManager = require("../lib/DatasetManager");
 const FileManager = require("../lib/FileManager");
 const RawDataManager = require("../lib/RawDataManager");
@@ -129,6 +132,19 @@ router.get("/:id/outlier", async function (req, res, next) {
 router.get("/:id/importance", async function (req, res, next) {
   const data = await DatasetManager.findWithImportance(req.params.id);
   res.json(data);
+});
+
+router.post("/:id/fairness", async function (req, res, next) {
+  const datasetId = req.params.id;
+  const checkedCols = req.body.checkedCols;
+
+  const after = await colstatService.search(datasetId, checkedCols, true);
+  const before = await colstatService.search(datasetId, checkedCols, false);
+
+  res.json({
+    before,
+    after,
+  });
 });
 
 router.get("/:id/fairness", async function (req, res, next) {
