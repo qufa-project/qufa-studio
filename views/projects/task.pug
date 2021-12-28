@@ -5,6 +5,7 @@ block content
 
   include _option_btns
   include _visual_modal
+  include _outlier_modal
   include _importance_modal
   include _compare_modal
   include _fairness_compare_modal
@@ -30,6 +31,11 @@ block scripts
   script.
     var projectId = #{project.id};
     $(document).ready(function(){
+      var rowsTemplate;
+      $.get("/javascripts/templates/data/rows.hbs", function (t) {
+        rowsTemplate = Handlebars.compile(t);
+      });
+
       $(document).on("click", ".visual-btn", function (e) {
         if (taskId) {
           if (task == "imputation") {
@@ -53,6 +59,19 @@ block scripts
                 $("#visual-modal").modal();
                 $("#visual-modal").modal("open");
               }
+            });
+          } else if (task == "outlier") {
+            $.getJSON("/datasets/" + datasetId + "/outlier", function(d) {
+              console.log(d.result);
+              console.log(d.result.num_outliers);
+
+              $("#outlier-deleted-count").text(d.result.num_outliers);
+
+              var rowsHtml = rowsTemplate({rows: d.deletedData.rows, isDeleted: true});
+              $("#deleted-rows").html(rowsHtml);
+
+              $("#outlier-modal").modal();
+              $("#outlier-modal").modal("open");
             });
           }
         }
@@ -160,24 +179,18 @@ block scripts
           var labelY = valueAxis.renderer.labels.template;
           labelY.fill = am4core.color("#fff");
 
-          _.forEach(data[0], function(val, k) {
-            if (k != "category") {
-              createSeries(val, k);
-            }
-          });
-
           function createSeries(value, name) {
             var series = chart.series.push(new am4charts.ColumnSeries());
             series.columns.template.width = am4core.percent(80);
             series.columns.template.tooltipText =
-              "{name}: {valueY.totalPercent.formatNumber('#.00')}%";
+              "'{name}': {valueY.totalPercent.formatNumber('#.00')}%";
             series.name = ""+name;
             series.dataFields.categoryX = "category";
             series.dataFields.valueY = name;
             series.dataFields.valueYShow = "totalPercent";
             series.dataItems.template.locations.categoryX = 0.5;
             series.stacked = true;
-            series.tooltip.pointerOrientation = "vertical";
+            // series.tooltip.pointerOrientation = "horizontal";
 
             var bullet = series.bullets.push(new am4charts.LabelBullet());
             bullet.interactionsEnabled = false;
@@ -185,6 +198,15 @@ block scripts
             bullet.label.fill = am4core.color("#ffffff");
             bullet.locationY = 0.5;
           }
+
+          _.forEach(data[0], function(val, k) {
+            if (k != "category") {
+              createSeries(val, k);
+            }
+          });
+
+          chart.cursor = new am4charts.XYCursor();
+          chart.cursor.xAxis = valueAxis;
         });
       }
 

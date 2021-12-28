@@ -1,5 +1,5 @@
-{{#each @this}}
-<tr class="data-row" data-id="{{findByIndex @this 0}}">
+{{#each rows}}
+<tr class="data-row {{#if ../isDeleted}}brown lighten-3{{/if}}" data-id="{{findByIndex @this 0}}">
   {{#each @this}}
   {{#ifCond @index ">" 0}}
   <td>

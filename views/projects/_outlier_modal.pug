@@ -1,0 +1,25 @@
+//  Modal Structure 
+#outlier-modal.modal.lg
+  .modal-content
+    h4 이상치 제거 리스트 
+      small 총(
+        span#outlier-deleted-count
+        | )건이 삭제되었습니다.
+
+    #outlier-result.col.s12.table-responsive
+      table.preview-table
+        thead
+          tr
+            each meta, index in dataset.metas
+              th.min.col-header(data-col=meta.name)
+                | #{meta.name}
+                br
+                small
+                  | #{meta.colType}
+                br
+                small
+                  | #{meta.koName}
+        tbody#deleted-rows
+
+  .modal-footer
+    a.modal-close.waves-effect.waves-green.btn-flat(href='#!') 확인

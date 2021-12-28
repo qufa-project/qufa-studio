@@ -121,8 +121,18 @@ router.get("/:id/outlier", async function (req, res, next) {
   const data = await DatasetManager.find(req.params.id);
 
   try {
-    const s3Obj = await FileManager.findS3Objct(data.getOutlierResultPath());
-    res.json(JSON.parse(s3Obj.Body.toString("utf-8")));
+    const s3Obj = await FileManager.findS3Objct(data.getResultJson());
+    const jsonObj = JSON.parse(s3Obj.Body.toString("utf-8"));
+
+    const ids = [];
+    for (const idx of jsonObj.result.outlier_indices) {
+      ids.push(idx - 1);
+    }
+
+    const dataset = await datasetService.findOriginByProject(data.projectId);
+
+    const deletedData = await RawDataManager.searchByIds(dataset, ids);
+    res.json({ result: jsonObj.result, deletedData });
   } catch (err) {
     console.log(err);
     res.json(null);
