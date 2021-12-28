@@ -1,16 +1,20 @@
 //  Modal Structure 
 #compare-modal.modal.lg
   .modal-content
-    h4 시각화 결과
+    h4 공정성 지표 비교
 
     .row
-      .col.l6
-        h6 이전
-        #before-result
+      .col.l4
+        h6 균등기회(Equality of Opportunity)
+        #equality-result.chart-wrap
 
-      .col.l6
-        h6 이후
-        #after-result
+      .col.l4
+        h6 균등승률(Equalized Odds)
+        #equalized-result.chart-wrap
+
+      .col.l4
+        h6 인구통계패리티(Demographic Parity)
+        #demographic-result.chart-wrap
 
   .modal-footer
     a.modal-close.waves-effect.waves-green.btn-flat(href='#!') 확인

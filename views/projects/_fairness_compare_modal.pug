@@ -1,7 +1,8 @@
 //  Modal Structure 
 #fairness-compare-modal.modal.lg
   .modal-content
-    h4 항목별 데이터 분포 비교
+    h4 항목별 데이터 분포 비교 
+      small (항목수가 너무 많은 경우 시각화 대상에서 제외됩니다.)
 
     #compare-cols.row
       .col
@@ -13,6 +14,7 @@
           label(for=`col-${meta.name}`)
             input.filled-in.col-checkbox(id=`col-${meta.name}` type='checkbox' value=meta.name checked)
             span=meta.name
+              span(id=`col-${meta.name}-cnt`)
       .col
         a#btn-fairness-viz.waves-effect.waves-light.btn Search
 
