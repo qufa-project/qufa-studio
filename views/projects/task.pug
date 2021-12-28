@@ -62,13 +62,13 @@ block scripts
             });
           } else if (task == "outlier") {
             $.getJSON("/datasets/" + datasetId + "/outlier", function(d) {
-              console.log(d.result);
-              console.log(d.result.num_outliers);
-
+              
               $("#outlier-deleted-count").text(d.result.num_outliers);
 
-              var rowsHtml = rowsTemplate({rows: d.deletedData.rows, isDeleted: true});
-              $("#deleted-rows").html(rowsHtml);
+              if (d.result.num_outliers > 0 && d.deletedData.rows && d.deletedData.rows.length) {
+                var rowsHtml = rowsTemplate({rows: d.deletedData.rows, isDeleted: true});
+                $("#deleted-rows").html(rowsHtml);
+              }
 
               $("#outlier-modal").modal();
               $("#outlier-modal").modal("open");
