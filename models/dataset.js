@@ -95,8 +95,10 @@ module.exports = (sequelize, DataTypes) => {
     getFairnessResultJson() {
       if (this.getFairnessDomain() == "health") {
         return `fairness/json/health_result.json`;
+      } else if (this.getFairnessDomain() == "health2") {
+        return `fairness/json/health_result2.json`;
       } else {
-        return `fairness/traffic_result.json`;
+        return `fairness/json/traffic_result.json`;
       }
     }
 
