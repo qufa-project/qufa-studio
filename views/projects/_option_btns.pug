@@ -4,34 +4,34 @@
   ul
     if !currentTask
       li
-        a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="태스크 정의")
+        a.btn-floating.red.modal-trigger.tooltipped(href="#task-modal" target="_blank" data-position="left" data-tooltip="New Task")
           i.material-icons account_tree
     li
-      a.btn-floating.yellow.darken-1.modal-trigger.tooltipped(href="#profile-modal" data-position="left" data-tooltip="프로파일링 상세결과")
+      a.btn-floating.yellow.darken-1.modal-trigger.tooltipped(href="#profile-modal" data-position="left" data-tooltip="Profiling Results")
         i.material-icons description
     li
-      a.btn-floating.orange.importance-btn.tooltipped(href="#importance-modal" data-position="left" data-tooltip="중요도 분석")
+      a.btn-floating.orange.importance-btn.tooltipped(href="#importance-modal" data-position="left" data-tooltip="Feature Importance")
         i.material-icons pivot_table_chart
 
     if currentTask && currentTask.task != "fairness"
       li
-        a.btn-floating.green.visual-btn.tooltipped(href="#visual-modal" data-position="left" data-tooltip="시각화" data-task=currentTask.task)
+        a.btn-floating.green.visual-btn.tooltipped(href="#visual-modal" data-position="left" data-tooltip="Visualization" data-task=currentTask.task)
           i.material-icons analytics    
     
     if currentTask && currentTask.task == "outlier"
       li
-        a.btn-floating.green.outlier-compare-btn.tooltipped(href="#outlier-compare-modal" data-position="left" data-tooltip="비교 분석" data-task=currentTask.task)
+        a.btn-floating.green.outlier-compare-btn.tooltipped(href="#outlier-compare-modal" data-position="left" data-tooltip="Evaluation" data-task=currentTask.task)
           i.material-icons grid_view
 
     if currentTask && currentTask.task == "fairness"
       li
-        a.btn-floating.green.compare-data-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="비교 분석" data-task=currentTask.task)
+        a.btn-floating.green.compare-data-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="Evaluation" data-task=currentTask.task)
           i.material-icons analytics
 
       li
-        a.btn-floating.cyan.compare-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="공정성 지표 비교" data-task="tpr")
+        a.btn-floating.cyan.compare-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="Fairness Metric" data-task="tpr")
           i.material-icons grid_view
 
     li
-      a.btn-floating.blue.tooltipped(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="다운로드")
+      a.btn-floating.blue.tooltipped(href=`/datasets/${dataset.id}/download` target="_blank" data-position="left" data-tooltip="Download")
         i.material-icons file_download

@@ -8,7 +8,7 @@ if dataset
     .col.s12
       ul.tabs
         li.tab
-          a(class=(currentTask ? "" : "active") href=`/projects/${project.id}`) 원본데이터
+          a(class=(currentTask ? "" : "active") href=`/projects/${project.id}`) Origin Dataset
         each task in project.tasks
           li.tab
             a(class=(currentTask && currentTask.id == task.id ? "active": "") href=`/projects/${project.id}/tasks/${task.id}`)=`${task.getTaskMsg()}(${task.getStatusMsg()})`

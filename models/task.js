@@ -3,19 +3,19 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   const TASK_STATUS = {
     init: { stat: "init", message: "요청중" },
-    processing: { stat: "processing", message: "태스크 진행중" },
-    save_data: { stat: "save_data", message: "결과 데이터 저장중" },
-    profiling: { stat: "profiling", message: "프로파일링 진행중" },
-    importance: { stat: "importance", message: "중요도분석" },
-    done: { stat: "done", message: "완료" },
-    error: { stat: "error", message: "오류" },
+    processing: { stat: "processing", message: "Processing" },
+    save_data: { stat: "save_data", message: "Saving" },
+    profiling: { stat: "profiling", message: "Profiling" },
+    importance: { stat: "importance", message: "Analyzing" },
+    done: { stat: "done", message: "Complete" },
+    error: { stat: "error", message: "Error" },
   };
 
   const TASKS = {
-    outlier: "이상치 제거",
-    imputation: "결측치 보완",
-    feature: "특징추출",
-    fairness: "공정성",
+    outlier: "Outlier Removal",
+    imputation: "Data Imputation",
+    feature: "Feature Engineering",
+    fairness: "Fairness Improvement",
     dimReduction: "차원축소",
   };
 
