@@ -471,6 +471,23 @@ $(document).ready(function () {
       heatLegend.valueAxis.hideTooltip();
     });
 
+    var cellSize = 30;
+    chart.events.on("datavalidated", function (ev) {
+      // Get objects of interest
+      var chart = ev.target;
+      var categoryAxis = chart.yAxes.getIndex(0);
+
+      // Calculate how we need to adjust chart height
+      var adjustHeight =
+        chart.data.length * cellSize - categoryAxis.pixelHeight;
+
+      // get current chart height
+      var targetHeight = chart.pixelHeight + adjustHeight;
+
+      // Set it on chart's container
+      chart.svgContainer.htmlElement.style.height = targetHeight + "px";
+    });
+
     $("#importance-modal").modal();
     $("#importance-modal").modal("open");
   }
