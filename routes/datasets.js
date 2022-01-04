@@ -121,11 +121,18 @@ router.get("/:id/outlier", async function (req, res, next) {
   const data = await DatasetManager.find(req.params.id);
 
   try {
+    console.log(`remote result json: ${data.getResultJson()}`);
     const s3Obj = await FileManager.findS3Objct(data.getResultJson());
     const jsonObj = JSON.parse(s3Obj.Body.toString("utf-8"));
 
     const ids = [];
-    for (const idx of jsonObj.result.outlier_indices) {
+
+    let outlierIndices = jsonObj.result.outlier_indices;
+    if (outlierIndices.length > 1000) {
+      outlierIndices = outlierIndices.slice(0, 1000);
+    }
+
+    for (const idx of outlierIndices) {
       ids.push(idx - 1);
     }
 
