@@ -2,7 +2,7 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   const TASK_STATUS = {
-    init: { stat: "init", message: "요청중" },
+    init: { stat: "init", message: "Init" },
     processing: { stat: "processing", message: "Processing" },
     save_data: { stat: "save_data", message: "Saving" },
     profiling: { stat: "profiling", message: "Profiling" },
