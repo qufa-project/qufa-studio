@@ -9,6 +9,7 @@ $dark-grey: #25262c;
 
 .modal-content {
   background-color: $dark-grey;
+  min-height: 500px;
 
   .input-field {
     > input,

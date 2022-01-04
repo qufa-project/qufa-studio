@@ -139,6 +139,74 @@ router.get("/:id/outlier", async function (req, res, next) {
   }
 });
 
+async function findBoxPlotData(dataset, yCol, xCol, xVal) {
+  const values = await RawDataManager.findValuesByColInfo(
+    dataset,
+    yCol,
+    xCol,
+    xVal
+  );
+
+  const q1 = Number(values[Math.floor(values.length / 4)]);
+  const median = Number(values[Math.floor(values.length / 2)]);
+  const q3 = Number(values[Math.floor(values.length * (3 / 4))]);
+  const iqr = q3 - q1;
+
+  // Then find min and max values
+  const maxValue = q3 + iqr * 1.5;
+  const minValue = q1 - iqr * 1.5;
+
+  // Then filter anything beyond or beneath these values.
+  const outliers = values.filter(function (x) {
+    x = Number(x);
+    return x > maxValue || x < minValue;
+  });
+
+  const result = {
+    iqr: iqr,
+    q1: q1,
+    median: median,
+    q3: q3,
+    outliers: outliers,
+    max: maxValue,
+    min: minValue,
+  };
+  return result;
+}
+
+router.post("/:id/outlier", async function (req, res, next) {
+  const xCol = req.body.xCol;
+  const yCol = req.body.yCol;
+
+  const dataset = await DatasetManager.find(req.params.id);
+  const originDataset = await datasetService.findOriginByProject(
+    dataset.projectId
+  );
+
+  const xValues = await RawDataManager.findDistinctValues(dataset, xCol);
+  const result = {};
+
+  for (const xValue of xValues) {
+    const xVal = xValue;
+    if (!result[xVal]) {
+      result[xVal] = {};
+    }
+
+    const boxPlotData = await findBoxPlotData(dataset, yCol, xCol, xVal);
+    result[xVal].after = boxPlotData;
+
+    const originBoxPlotData = await findBoxPlotData(
+      originDataset,
+      yCol,
+      xCol,
+      xVal
+    );
+    result[xVal].before = originBoxPlotData;
+  }
+
+  res.json(result);
+});
+
 router.get("/:id/importance", async function (req, res, next) {
   const data = await DatasetManager.findWithImportance(req.params.id);
   res.json(data);

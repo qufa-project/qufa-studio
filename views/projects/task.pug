@@ -6,10 +6,12 @@ block content
   include _option_btns
   include _visual_modal
   include _outlier_modal
+  include _outlier_compare_modal
   include _importance_modal
   include _compare_modal
   include _fairness_compare_modal
   include _profile_modal
+  
 
 block scripts
   script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
@@ -76,6 +78,135 @@ block scripts
           }
         }
       });
+
+      $(document).on("click", ".outlier-compare-btn", function() {
+        $(document).ready(function(){
+          $('select').formSelect();
+        });
+
+        $("#outlier-compare-modal").modal();
+        $("#outlier-compare-modal").modal("open");
+      });
+
+      $(document).on("click", "#btn-outliser-compare-viz", function() {
+        var data = {
+          xCol: $("#x-value").val(),
+          yCol: $("#y-value").val()
+        };
+
+        $.ajax({
+            url: "/datasets/" + datasetId + "/outlier",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function(d) {
+              console.log(d);
+              if (d) {
+                _.forEach(d, function(value, key) {
+                  var graphId = "graph-" + key;
+                  var $graphWrap = $("<div/>").addClass("col").addClass("s12").addClass("l4").append($("<div/>").attr("id", graphId).addClass("chart-wrap"));
+                  $("#outlier-compare-result").append($graphWrap);
+                });
+
+                _.forEach(d, function(value, k) {
+                  var graphId = "graph-" + k;
+                  var chartData = [];
+                  
+                  console.log(k);
+                  chartData.push({
+                    category: "before " + k,
+                    q1: value.before.q1,
+                    q3: value.before.q3,
+                    median: value.before.median,
+                    min: value.before.min,
+                    max: value.before.max
+                  });
+
+                  chartData.push({
+                    category: "after " + k,
+                    q1: value.after.q1,
+                    q3: value.after.q3,
+                    median: value.after.median,
+                    min: value.after.min,
+                    max: value.after.max
+                  });
+
+                  console.log(chartData);
+
+                  renderBoxPlot(graphId, chartData);
+                });
+              }
+            }
+        });
+      });
+
+      function renderBoxPlot(container, data) {
+        am4core.ready(function() {
+          am4core.useTheme(am4themes_animated);
+          
+          var chart = am4core.create(container, am4charts.XYChart);
+          chart.data = data;
+          chart.padding(30, 30, 10, 30);
+          chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+          valueAxis.tooltip.disabled = true;
+          var labelY = valueAxis.renderer.labels.template;
+          labelY.fill = am4core.color("#fff");
+
+          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+          categoryAxis.dataFields.category = "category";
+          categoryAxis.renderer.grid.template.location = 0;
+          categoryAxis.renderer.grid.template.stroke = am4core.color("#fff");
+          var label = categoryAxis.renderer.labels.template;
+          label.fill = am4core.color("#fff");
+
+          var series = chart.series.push(new am4charts.CandlestickSeries());
+          //series.dataFields.dateX = "date";
+          series.dataFields.categoryX = "category";
+          series.dataFields.valueY = "q3";
+          series.dataFields.openValueY = "q1";
+          series.dataFields.lowValueY = "min";
+          series.dataFields.highValueY = "max";
+          series.simplifiedProcessing = true;
+          series.tooltipText = "Q1:{openValueY.value}\nMedian:{median}\nQ3: {valueY.value}\nLow: {lowValueY.value}\nHigh: {highValueY.value}\n";
+          series.riseFromOpenState = undefined;
+          series.dropFromOpenState = undefined;
+
+          chart.cursor = new am4charts.XYCursor();
+
+          var medianaSeries = chart.series.push(new am4charts.StepLineSeries());
+          medianaSeries.noRisers = true;
+          medianaSeries.startLocation = 0.1;
+          medianaSeries.endLocation = 0.9;
+          medianaSeries.dataFields.valueY = "median";
+          medianaSeries.dataFields.categoryX = "category";
+          //medianaSeries.dataFields.dateX = "date";
+          medianaSeries.strokeWidth = 2;
+          medianaSeries.stroke = am4core.color("#fff");
+
+          var topSeries = chart.series.push(new am4charts.StepLineSeries());
+          topSeries.noRisers = true;
+          topSeries.startLocation = 0.2;
+          topSeries.endLocation = 0.8;
+          topSeries.dataFields.valueY = "max";
+          topSeries.dataFields.categoryX = "category";
+          //topSeries.dataFields.dateX = "date";
+          topSeries.stroke = chart.colors.getIndex(0);
+          topSeries.strokeWidth = 2;
+
+          var bottomSeries = chart.series.push(new am4charts.StepLineSeries());
+          bottomSeries.noRisers = true;
+          bottomSeries.startLocation = 0.2;
+          bottomSeries.endLocation = 0.8;
+          bottomSeries.dataFields.valueY = "min";
+          bottomSeries.dataFields.categoryX = "category";
+          //bottomSeries.dataFields.dateX = "date";
+          bottomSeries.stroke = chart.colors.getIndex(0);
+          bottomSeries.strokeWidth = 2;
+
+        });
+      }
 
       $(document).on("click", ".compare-data-btn", function() {
         $("#fairness-compare-modal").modal();

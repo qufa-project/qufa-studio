@@ -1,0 +1,27 @@
+//  Modal Structure 
+#outlier-compare-modal.modal.lg
+  .modal-content
+    h4 이상치 제거에 따른 데이터 분포 비교
+
+    .row
+      .input-field.col.s5
+        select#x-value
+          each meta in dataset.metas
+            option(value=meta.name)=meta.name
+        label X축
+        
+      .input-field.col.s5
+        select#y-value
+          each meta in dataset.metas
+            if meta.colType == "number"
+              option(value=meta.name)=meta.name
+        label Y축(Number 타입)
+      
+      .input-field.col
+        a#btn-outliser-compare-viz.waves-effect.waves-light.btn Search
+
+    .row
+      #outlier-compare-result.row
+
+  .modal-footer
+    a.modal-close.waves-effect.waves-green.btn-flat(href='#!') 확인

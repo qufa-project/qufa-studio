@@ -12,14 +12,20 @@
     li
       a.btn-floating.orange.importance-btn.tooltipped(href="#importance-modal" data-position="left" data-tooltip="중요도 분석")
         i.material-icons pivot_table_chart
-        
+
     if currentTask && currentTask.task != "fairness"
       li
         a.btn-floating.green.visual-btn.tooltipped(href="#visual-modal" data-position="left" data-tooltip="시각화" data-task=currentTask.task)
-          i.material-icons analytics
+          i.material-icons analytics    
+    
+    if currentTask && currentTask.task == "outlier"
+      li
+        a.btn-floating.green.outlier-compare-btn.tooltipped(href="#outlier-compare-modal" data-position="left" data-tooltip="비교 분석" data-task=currentTask.task)
+          i.material-icons grid_view
+
     if currentTask && currentTask.task == "fairness"
       li
-        a.btn-floating.green.compare-data-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="시각화" data-task=currentTask.task)
+        a.btn-floating.green.compare-data-btn.tooltipped(href="#compare-modal" data-position="left" data-tooltip="비교 분석" data-task=currentTask.task)
           i.material-icons analytics
 
       li
