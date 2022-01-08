@@ -100,7 +100,7 @@ block scripts
             contentType: "application/json",
             data: JSON.stringify(data),
             success: function(d) {
-              console.log(d);
+              
               if (d) {
                 _.forEach(d, function(value, key) {
                   var graphId = "graph-" + key;
@@ -111,16 +111,33 @@ block scripts
                 _.forEach(d, function(value, k) {
                   var graphId = "graph-" + k;
                   var chartData = [];
+
                   
-                  console.log(k);
+
+                  var outliers = [];
+                  for (var o of value.before.outliers) {
+                    outliers.push({
+                      category: "before " + k,
+                      y: o
+                    })
+                  }
+                  
                   chartData.push({
                     category: "before " + k,
                     q1: value.before.q1,
                     q3: value.before.q3,
                     median: value.before.median,
                     min: value.before.min,
-                    max: value.before.max
+                    max: value.before.max,
                   });
+
+                  //var afterOutliers = [];
+                  for (var o of value.after.outliers) {
+                    outliers.push({
+                      category: "after " + k,
+                      y: o
+                    })
+                  }
 
                   chartData.push({
                     category: "after " + k,
@@ -131,16 +148,14 @@ block scripts
                     max: value.after.max
                   });
 
-                  console.log(chartData);
-
-                  renderBoxPlot(graphId, chartData);
+                  renderBoxPlot(graphId, chartData, outliers);
                 });
               }
             }
         });
       });
 
-      function renderBoxPlot(container, data) {
+      function renderBoxPlot(container, data, outliers) {
         am4core.ready(function() {
           am4core.useTheme(am4themes_animated);
           
@@ -205,6 +220,16 @@ block scripts
           bottomSeries.stroke = chart.colors.getIndex(0);
           bottomSeries.strokeWidth = 2;
 
+          var bulletSeries = chart.series.push(new am4charts.LineSeries());
+          bulletSeries.strokeOpacity = 0;
+          bulletSeries.data = outliers;
+          // bulletSeries.dataFields.dateX = "date";
+          bulletSeries.dataFields.categoryX = "category";
+          bulletSeries.dataFields.valueY = "y";
+          bulletSeries.tooltipText = "{valueY.value}";
+
+          var bullet = bulletSeries.bullets.push(new am4charts.CircleBullet());
+          bullet.fill = am4core.color("#fff");
         });
       }
 
@@ -230,7 +255,7 @@ block scripts
             contentType: "application/json",
             data: JSON.stringify({checkedCols: checkedCols}),
             success: function(d) {
-              console.log(d);
+              
               if (d.before && d.after) {
                 var beforeG = _.groupBy(d.before, 'colName');
                 var afterG = _.groupBy(d.after, 'colName');
